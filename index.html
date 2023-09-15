@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>fish</title>
+    <style>
+       .columns {
+            width: 16.5%;
+            float: left;
+            padding-top: 150px;
+            box-sizing: border-box;
+            text-align: center;
+        }   
+        /* Clear the float to prevent layout issues */
+        .row::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+        button {
+            justify-content: center;
+            align-items: center;
+        }
+        .timer_input {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="row">
+        <!-- First Column -->
+        <div class="columns">
+            <!-- Blank -->
+        </div>
+         
+        <!-- Second Column -->
+         <div class="columns">
+            <!-- Blank -->
+        </div>
+
+        <!-- Middle left Column -->
+        <div class="columns">
+            <h2>Work Timer</h2>
+            <input class="timer_input" type="text" placeholder="00:00"> 
+            <br> <br>
+            <button>START</button>
+            <button>STOP</button>
+        </div>
+
+        <!-- Middle right Column -->
+        <div class="columns">
+            <h2>Break Timer</h2>
+            <input class="timer_input" type="text" placeholder="00:00"> 
+            <br> <br>
+            <button>START</button>
+            <button>STOP</button>
+        </div>
+    </div>
+</body>
+</html>
