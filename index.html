@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study Buddy Options</title>
@@ -54,6 +53,10 @@
             width: 350px;
             height: 20px;
         }
+
+        .button_remove {
+            height: 26px;
+        }
     </style>
 </head>
 <body>
@@ -62,7 +65,7 @@
         <div class="textboxtop">
             <h1>Work Timer</h1>
             <input class="timer_input" type="text" placeholder="00:00"> 
-            <br> <br>
+            <br><br>
             <button>START</button>
             <button>STOP</button>
         </div>
@@ -70,7 +73,7 @@
         <div class="textboxtop">
             <h1>Break Timer</h1>
             <input class="timer_input" type="text" placeholder="00:00"> 
-            <br> <br>
+            <br><br>
             <button>START</button>
             <button>STOP</button>
         </div>
@@ -80,7 +83,8 @@
         <div class="textboxbottom">
             <h1>Permitted Websites</h1> 
             <input class="website_input" type="text" placeholder="Enter URL Here"> 
-            <button><strong>X</strong></button> 
+            <button class="button_remove"><strong>X</strong></button> 
+            <br><br>
             <button>Add Website</button>   
         </div>
     </div>
