@@ -3,25 +3,33 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study Buddy Options</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans"> <!--changing the font to nunito sans-->
+    <!--changing the font to nunito sans-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans"> 
     <style>
+        /* element styles */
         body {
             font-family: 'Nunito Sans', sans-serif;
             margin: 0;
             padding: 0;
-            height: 100vh;
+            height: 70vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
 
+        button {
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* class styles */
         .row {
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100%;
-            height: 20%;
+            height: 30%;
         }
 
         .textboxtop {
@@ -31,14 +39,9 @@
         }
 
         .textboxbottom {
-            width: 300px;
+            width: 400px;
             padding: 10px;
             text-align: center;
-        }
-
-        button {
-            justify-content: center;
-            align-items: center;
         }
 
         .timer_input {
@@ -48,23 +51,24 @@
 
         .website_input {
             text-align: center;
-            width: 300px;
+            width: 350px;
             height: 20px;
         }
     </style>
 </head>
 <body>
     <div class="row">
+        <!-- work timer -->
         <div class="textboxtop">
-            <h2>Work Timer</h2>
+            <h1>Work Timer</h1>
             <input class="timer_input" type="text" placeholder="00:00"> 
             <br> <br>
             <button>START</button>
             <button>STOP</button>
         </div>
-        
+        <!-- break timer -->
         <div class="textboxtop">
-            <h2>Break Timer</h2>
+            <h1>Break Timer</h1>
             <input class="timer_input" type="text" placeholder="00:00"> 
             <br> <br>
             <button>START</button>
@@ -72,9 +76,11 @@
         </div>
     </div>
     <div class="row">
+        <!-- permitted websites -->
         <div class="textboxbottom">
-            <h2>Permitted Websites</h2> 
+            <h1>Permitted Websites</h1> 
             <input class="website_input" type="text" placeholder="Enter URL Here"> 
+            <button><strong>X</strong></button> 
             <button>Add Website</button>   
         </div>
     </div>
