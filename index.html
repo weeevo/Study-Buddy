@@ -1,90 +1,93 @@
 <!DOCTYPE html>
+<html lang="en">
+
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study Buddy Options</title>
-    <!--changing the font to nunito sans-->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans"> 
-    <style>
-        /* element styles */
-        body {
-            font-family: 'Nunito Sans', sans-serif;
-            margin: 0;
-            padding: 0;
-            height: 65vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        button {
-            justify-content: center;
-            align-items: center;
-            height: 26px;
-        }
-
-        /* class styles */
-        .row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            height: 35%;
-        }
-
-        .textbox_top {
-            width: 200px;
-            padding: 10px;
-            text-align: center;
-        }
-
-        .textbox_bottom {
-            width: 400px;
-            padding: 10px;
-            text-align: center; 
-        }
-
-        .timer_input {
-            text-align: center;
-            height: 20px;
-        }
-
-        .website_input {
-            text-align: center;
-            width: 350px;
-            height: 20px;
-        }
-
-    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+    <link rel="stylesheet" href="./index.css">
 </head>
+
 <body>
-    <div class="row">
-        <!-- work timer -->
-        <div class="textbox_top">
-            <h1>Work Timer</h1>
-            <input class="timer_input" type="text" placeholder="00:00"> 
-            <br><br>
-            <button>START</button>
-            <button>STOP</button>
+    <div>
+        <!-- timers -->
+        <div class="row_timers">
+            <div class="subrow_timers">
+                <div class="column_timers header">
+                    Work Timer
+                </div>
+                <div class="column_timers header">
+                    Break Timer
+                </div>
+            </div>
+            <div class="subrow_timers">
+                <div class="column_timers">
+                    <input class="timer_input" placeholder="hr" type="number" id="workHours">
+                    <input class="timer_input" placeholder="min" type="number" id="workMinutes">
+                </div>
+                <div class="column_timers">
+                    <input class="timer_input" placeholder="hr" type="number" id="breakHours">
+                    <input class="timer_input" placeholder="min" type="number" id="breakMinutes">
+                </div>
+            </div>
+            <div class="subrow_timers">
+                <div class="button_row">
+                    <button id="startButton"> Start </button>
+                </div>
+                <div class="button_row">
+                    <button id="stopButton"> Stop </button>
+                </div>
+                <div class="button_row">
+                    <div class="repeat_dropdown">
+                        <label>Repeat:</label>
+                        <select id="repeatAmount">
+                            <option value="0">0x</option>
+                            <option value="1">1x</option>
+                            <option value="2">2x</option>
+                            <option value="3">3x</option>
+                            <option value="4">4x</option>
+                            <option value="5">5x</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- break timer -->
-        <div class="textbox_top">
-            <h1>Break Timer</h1>
-            <input class="timer_input" type="text" placeholder="00:00"> 
-            <br><br>
-            <button>START</button>
-            <button>STOP</button>
+
+        <p></p> <!-- blank paragraph for spacing-->
+
+        <!-- time remaining-->
+        <div class="row_timeRemaining">
+            <div id="timerHeader" class="subrow_timeRemaining header">
+                Timer Stopped
+            </div>
+            <div id="timerDisplay" class="subrow_clock clock">
+                --:--:--
+            </div>
+        </div>
+
+        <p></p> <!-- blank paragraph for spacing-->
+
+        <!-- permitted websites-->
+        <div class="row_links">
+            <div class="subrow_links header">
+                Permitted Websites
+            </div>
+            <div class="subrow_links header">
+                <input class="link_input" placeholder="Enter URL here..." type="text">
+            </div>
+            <div class="subrow_links header">
+                <div class="button_row">
+                    <button> Add Website </button>
+                </div>
+                <div class="button_row">
+                    <button> Remove Website </button>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="row">
-        <!-- permitted websites -->
-        <div class="textbox_bottom">
-            <h1>Permitted Websites</h1> 
-            <input class="website_input" type="text" placeholder="Enter URL Here"> 
-            <button><strong>X</strong></button> 
-            <br><br>
-            <button>Add Website</button>   
-        </div>
-    </div>
+
+    <script src="scripts/timer.js"></script>
+
 </body>
+
 </html>
