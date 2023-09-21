@@ -3,7 +3,7 @@ body {
     font-family: Lato;
     background-color: rgba(224, 224, 224, 1);
     width: 470px;
-    height: 445px;
+    height: 485px;
 }
 .header {
     color: #151515;
@@ -82,30 +82,39 @@ button:active {
     justify-content: center;
     display: flex;
     flex-direction: column;
-    height: 150px;
+    height: 190px;
     width: 468px;
     border: 1px solid rgba(201, 201, 201, 1);
     background: rgba(209, 209, 209, 0);
 }
 .subrow_timeRemaining {
     padding-top: 10px;
-    height: 25%;
+    padding-bottom: 7.5px;
+    height: 20%;
     justify-content: center;
     align-items: center;
     display: flex;
     flex-direction: row;
 }
 .subrow_clock {
+    display: flex;
     justify-content: center;
     text-align: center;
     flex-direction: row;
-    height: 75%;
-    padding-top: 5px;
+    height: 60%;
 }
 .clock {
     color: #151515;
     font-size: 80px;
     font-weight: 700;
+}
+.clock_buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 33%;
 }
 /* style for permitted websites row */
 .row_links {

@@ -11,21 +11,27 @@ const timerHeader = document.getElementById('timerHeader');
 var repeatAmountInput = document.getElementById('repeatAmount');
 
 const startButton = document.getElementById('startButton');
-const stopButton = document.getElementById('stopButton');
+const resetButton = document.getElementById('resetButton');
+const pauseButton = document.getElementById('pauseButton');
+const skipButton = document.getElementById('skipButton');
 
 startButton.addEventListener("click", initializeTimer, false);
-stopButton.addEventListener("click", stopTimer, false);
+resetButton.addEventListener("click", resetTimer, false);
+//pauseButton.addEventListener("click", pauseTimer, false);
+skipButton.addEventListener("click", skipTimer, false);
 
 //declaring basic variables
 var count = 0;
 var waitCount = 1;
 
 var nextTimer;
-var timerIsActive;
+var timerIsActive = false;
+var timerSkipped = false;
 
 function initializeTimer() {
     //resetting the display every time the timer resets
     timerIsActive = true;
+    timerSkipped = false;
     waitCount = 1;
     timerHeader.textContent = 'Timer Stopped';
     timerDisplay.textContent = ('--:--:--');
@@ -35,23 +41,35 @@ function initializeTimer() {
     var workMinuteValue = parseFloat(workMinuteInput.value);
     var breakHourValue = parseFloat(breakHourInput.value);
     var breakMinuteValue = parseFloat(breakMinuteInput.value);
+    var repeatAmountValue = repeatAmountInput.value;
 
+
+    //check if the user inputted at least 1 value
+    if (isNaN(workHourValue) && isNaN(workMinuteValue) && isNaN(breakHourValue) && isNaN(breakMinuteValue)) {
+        alert('Enter at least 1 value!');
+        resetTimer();
+    }
     //default to 0
-    if (isNaN(workHourValue)) {
-        workHourValue = 0;
+    else {
+        if (isNaN(workHourValue)) {
+            workHourValue = 0;
+        }
+        if (isNaN(workMinuteValue)) {
+            workMinuteValue = 0;
+        }
+        if (isNaN(breakHourValue)) {
+            breakHourValue = 0;
+        }
+        if (isNaN(breakMinuteValue)) {
+            breakMinuteValue = 0;
+        }
     }
-    if (isNaN(workMinuteValue)) {
-        workMinuteValue = 0;
-    }
-    if (isNaN(breakHourValue)) {
-        breakHourValue = 0;
-    }
-    if (isNaN(breakMinuteValue)) {
-        breakMinuteValue = 0;
-    }
-    
+
     //check if timer has run more times than we want to repeat
-    if (count % 2 == 0) {
+    if ((count - 1) > repeatAmountValue) {
+        resetTimer();
+    }
+    else if (count % 2 == 0) {
         updateWorkTimer(workHourValue, workMinuteValue);
     }
     else {
@@ -59,15 +77,25 @@ function initializeTimer() {
     }
 }
 
+function skipTimer() {
+    if (timerIsActive) {
+        timerHeader.textContent = 'Timer Skipped';
+        timerDisplay.textContent = ('--:--:--');
+        timerSkipped = true;
+        count++;
+        clearTimeout();
+    }
+}
+
 //reset every time timer stops
-function stopTimer() {
+function resetTimer() {
     clearTimeout();
     timerIsActive = false;
     count = 0;
-    waitcount = 1;
+    waitCount = 1;
     timerHeader.textContent = 'Timer Stopped';
     timerDisplay.textContent = ('--:--:--');
-    nextTimer = 'Work';  
+    nextTimer = 'Work';
 }
 
 function updateWorkTimer(hourValue, minuteValue) {
@@ -90,7 +118,12 @@ function updateBreakTimer(hourValue, minuteValue) {
 
 function loop(hourValue, minuteValue, timeStart, timeEnd, nextTimer) {
     if (timerIsActive) {
-        if (getTimeRemaining(hourValue, minuteValue, timeStart, timeEnd) != '00:00') {
+        if (timerSkipped) {
+            getTimeRemaining(hourValue, minuteValue, timeStart, timeEnd) == '00:00';
+            timerDisplay.textContent = ('--:--:--');
+            initializeTimer();
+        }
+        else if (getTimeRemaining(hourValue, minuteValue, timeStart, timeEnd) != '00:00') {
             setTimeout(() => {
                 timerDisplay.textContent = getTimeRemaining(hourValue, minuteValue, timeStart, timeEnd);
                 loop(hourValue, minuteValue, timeStart, timeEnd, nextTimer);
@@ -102,13 +135,14 @@ function loop(hourValue, minuteValue, timeStart, timeEnd, nextTimer) {
         }
     }
     else {
-        stopTimer();
+        resetTimer();
     }
 }
 
 function timerSwitch(nextTimer) {
-    if((count-1) > repeatAmountInput.value) {
-        stopTimer();
+    timerSkipped = false;
+    if ((count - 1) > repeatAmountInput.value) {
+        resetTimer();
     }
     else if (waitCount <= 4) {
         setTimeout(() => {
@@ -126,7 +160,7 @@ function timerSwitch(nextTimer) {
 function getTimeRemaining(hourValue, minuteValue, timeStart, timeEnd) {
     var timeRemainingOutput;
     var timeNow = new Date().getTime();
-    var duration = timeEnd - timeNow;
+    var duration = (timeEnd - timeNow) + 2000;
 
     var hours = Math.floor((duration % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     var minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));

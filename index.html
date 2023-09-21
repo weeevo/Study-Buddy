@@ -22,12 +22,12 @@
             </div>
             <div class="subrow_timers">
                 <div class="column_timers">
-                    <input class="timer_input" placeholder="hr" type="number" id="workHours">
-                    <input class="timer_input" placeholder="min" type="number" id="workMinutes">
+                    <input class="timer_input" placeholder="hr" type="number" min="0" id="workHours">
+                    <input class="timer_input" placeholder="min" type="number" min="0" max="59" id="workMinutes">
                 </div>
                 <div class="column_timers">
-                    <input class="timer_input" placeholder="hr" type="number" id="breakHours">
-                    <input class="timer_input" placeholder="min" type="number" id="breakMinutes">
+                    <input class="timer_input" placeholder="hr" type="number" min="0" id="breakHours">
+                    <input class="timer_input" placeholder="min" type="number" min="0" max="59" id="breakMinutes">
                 </div>
             </div>
             <div class="subrow_timers">
@@ -35,7 +35,7 @@
                     <button id="startButton"> Start </button>
                 </div>
                 <div class="button_row">
-                    <button id="stopButton"> Stop </button>
+                    <button id="resetButton"> Reset </button>
                 </div>
                 <div class="button_row">
                     <div class="repeat_dropdown">
@@ -62,6 +62,14 @@
             </div>
             <div id="timerDisplay" class="subrow_clock clock">
                 --:--:--
+            </div>
+            <div class="subrow_timeRemaining">
+                <div id="timerButtons" class="clock_buttons">
+                    <button id="pauseButton"> Pause </button>
+                </div>
+                <div id="timerButtons" class="clock_buttons">
+                    <button id="skipButton"> Skip </button>
+                </div>
             </div>
         </div>
 

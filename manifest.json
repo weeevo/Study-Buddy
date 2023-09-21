@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Productivity Timer",
-    "version": "0.1",
-    "description": "timer to help manage work and not get tired",
+    "version": "0.5",
+    "description": "Pomodoro-esque productivity timer, configurable to your liking!",
     "icons": {
         "16": "images/icon-48.png",
         "32": "images/icon-48.png",
