@@ -33,7 +33,7 @@ function initializeTimer() {
     timerIsActive = true;
     timerSkipped = false;
     waitCount = 1;
-    timerHeader.textContent = 'Timer Stopped';
+    timerHeader.textContent = 'Press \'Start\' to Begin';
     timerDisplay.textContent = ('--:--:--');
 
     //take in the values from the input elements and store them as variables
@@ -49,7 +49,7 @@ function initializeTimer() {
         alert('Enter at least 1 value!');
         resetTimer();
     }
-    //default to 0
+    //default time values to 0
     else {
         if (isNaN(workHourValue)) {
             workHourValue = 0;
@@ -77,11 +77,17 @@ function initializeTimer() {
     }
 }
 
+//run when pause button is pressed
+function pauseTimer() {
+    //add code
+}
+
+//run when skip button is pressed
 function skipTimer() {
     if (timerIsActive) {
         timerHeader.textContent = 'Timer Skipped';
         timerDisplay.textContent = ('--:--:--');
-        timerSkipped = true;
+        timerSkipped = true; //default false, true if timer has been pressed
         count++;
         clearTimeout();
     }
@@ -93,11 +99,12 @@ function resetTimer() {
     timerIsActive = false;
     count = 0;
     waitCount = 1;
-    timerHeader.textContent = 'Timer Stopped';
+    timerHeader.textContent = 'Timer Reset';
     timerDisplay.textContent = ('--:--:--');
     nextTimer = 'Work';
 }
 
+//work timer
 function updateWorkTimer(hourValue, minuteValue) {
     timerHeader.textContent = `Work Time Remaining:`;
     nextTimer = 'Break';
@@ -107,6 +114,7 @@ function updateWorkTimer(hourValue, minuteValue) {
     loop(hourValue, minuteValue, timeStart, timeEnd, nextTimer);
 }
 
+//break timer
 function updateBreakTimer(hourValue, minuteValue) {
     timerHeader.textContent = `Break Time Remaining:`;
     nextTimer = 'Work';
@@ -116,19 +124,24 @@ function updateBreakTimer(hourValue, minuteValue) {
     loop(hourValue, minuteValue, timeStart, timeEnd, nextTimer);
 }
 
+//timer manager
 function loop(hourValue, minuteValue, timeStart, timeEnd, nextTimer) {
+    //if timer isn't active, run resetTimer and wait for timer to become active
     if (timerIsActive) {
+        //check if skip button has been pressed every time loop() is called
         if (timerSkipped) {
             getTimeRemaining(hourValue, minuteValue, timeStart, timeEnd) == '00:00';
             timerDisplay.textContent = ('--:--:--');
-            initializeTimer();
+            initializeTimer(); //restart timer with increased count, skipping timerSwitch and starting next timer
         }
+        //
         else if (getTimeRemaining(hourValue, minuteValue, timeStart, timeEnd) != '00:00') {
             setTimeout(() => {
                 timerDisplay.textContent = getTimeRemaining(hourValue, minuteValue, timeStart, timeEnd);
                 loop(hourValue, minuteValue, timeStart, timeEnd, nextTimer);
             }, 1000);
         }
+        //if time has run out, switch to next timer
         else {
             count++;
             timerSwitch(nextTimer);
@@ -139,8 +152,10 @@ function loop(hourValue, minuteValue, timeStart, timeEnd, nextTimer) {
     }
 }
 
+//countdown until next timer starts
 function timerSwitch(nextTimer) {
     timerSkipped = false;
+    //doesnt do countdown if timer should stop running
     if ((count - 1) > repeatAmountInput.value) {
         resetTimer();
     }
@@ -153,10 +168,12 @@ function timerSwitch(nextTimer) {
         }, 1000);
     }
     else {
+        //restart
         initializeTimer();
     }
 }
 
+//timer logic, calculates how much time is remaining on timer and outputs to screen
 function getTimeRemaining(hourValue, minuteValue, timeStart, timeEnd) {
     var timeRemainingOutput;
     var timeNow = new Date().getTime();
