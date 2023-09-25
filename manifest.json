@@ -15,7 +15,8 @@
     "content_scripts": [
         {
             "js": [
-                "scripts/timer.js"
+                "scripts/timer v1.js",
+                "scripts/timer v2.js"
             ],
             "matches": [
                 "https://developer.chrome.com/docs/webstore/*",
