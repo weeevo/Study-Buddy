@@ -9,19 +9,18 @@
         "48": "images/icon-48.png",
         "128": "images/icon-48.png"
     },
+    "permissions": [
+        "activeTab"
+    ],
     "action": {
         "default_popup": "index.html"
       },
     "content_scripts": [
         {
             "js": [
-                "scripts/timer v1.js",
-                "scripts/timer v2.js"
+                "scripts/timer v1.js"
             ],
-            "matches": [
-                "https://developer.chrome.com/docs/webstore/*",
-                "https://developer.chrome.com/docs/extensions/*"
-            ]
+            "matches": [ "<all_urls>" ]
         }
     ]
 }
