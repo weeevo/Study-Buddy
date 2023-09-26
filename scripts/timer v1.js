@@ -84,17 +84,8 @@ function initializeTimer() {
 }
 
 //run when pause button is pressed
-function pauseTimer() {
-    /* what it will do
-        1. freeze countdown clock at the current time it's at
-            - get time at button press, add to duration for each loop
-        2. change text on button to 'Resume'
-        3. if pressed again, start countdown clock where it was left off
-        4. change text on button to 'Pause'
-        5. change header to '______ Timer Paused', blank for which timer is currently running
-    */
+function pauseTimer() { 
     if (timerIsActive) {
-        console.log('pressed pause')
         pauseCount++;
         if(pauseCount % 2 == 0) {
             pauseButton.textContent = 'Resume';
@@ -166,7 +157,6 @@ function loop() {
         else if(timerPaused) {
             clearTimeout(x);
         }
-        //
         else if (time > -1) {
             var x = setTimeout(() => {
                 time--;
@@ -216,10 +206,6 @@ function getTimeRemaining() {
         minutes -= 60;
     }
     var seconds = Math.floor(time % 60);
-    console.log("time: " + time);
-    console.log("hours: " + hours);
-    console.log("minutes: " + minutes);
-    console.log("seconds: " + seconds);
 
     if (hours <= 0) {
         timeRemainingOutput = `${('00' + minutes).slice(-2)}:${('00' + seconds).slice(-2)}`;
