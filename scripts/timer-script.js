@@ -15,6 +15,7 @@ const resetButton = document.getElementById('resetButton');
 const pauseButton = document.getElementById('pauseButton');
 const skipButton = document.getElementById('skipButton');
 
+//event listeners
 startButton.addEventListener("click", initializeTimer, false);
 resetButton.addEventListener("click", resetTimer, false);
 pauseButton.addEventListener("click", pauseTimer, false);
@@ -22,10 +23,11 @@ skipButton.addEventListener("click", skipTimer, false);
 
 //declaring counters
 var runCount = 0;
-var waitCount;
+var waitCount = 1;
 var pauseCount = 1;
 
 //declaring timer functionality variables
+var x; //setTimeout later
 var time;
 var nextTimer;
 var timerIsActive = false;
@@ -35,10 +37,10 @@ var timerPaused = false;
 function initializeTimer() {
     //resetting when timer resets
     time = 0;
+    waitCount = 1;
     timerPaused = false;
     timerIsActive = true;
     timerSkipped = false;
-    waitCount = 1;
     timerHeader.textContent = 'Press \'Start\' to Begin';
     timerDisplay.textContent = ('--:--:--');
 
@@ -86,6 +88,7 @@ function initializeTimer() {
 //run when pause button is pressed
 function pauseTimer() { 
     if (timerIsActive) {
+        clearTimeout(x);
         pauseCount++;
         if(pauseCount % 2 == 0) {
             pauseButton.textContent = 'Resume';
@@ -109,21 +112,25 @@ function pauseTimer() {
 //run when skip button is pressed
 function skipTimer() {
     if (timerIsActive) {
+        clearTimeout(x);
         timerHeader.textContent = 'Timer Skipped';
         timerDisplay.textContent = ('--:--:--');
         timerSkipped = true; //default false, true if timer has been pressed
         runCount++;
-        clearTimeout();
     }
 }
 
 //reset every time timer stops
 function resetTimer() {
-    clearTimeout();
-    time = 0;
+    //resetting everythinggggggggg
+    clearTimeout(x);
+    timerPaused = false;
     timerIsActive = false;
+    time = 0;
+    pauseCount = 1;
     runCount = 0;
     waitCount = 1;
+    pauseButton.textContent = 'Pause';
     timerHeader.textContent = 'Timer Reset';
     timerDisplay.textContent = ('--:--:--');
 }
@@ -157,10 +164,10 @@ function loop() {
         else if(timerPaused) {
             clearTimeout(x);
         }
-        else if (time > -1) {
-            var x = setTimeout(() => {
-                time--;
+        else if (time >= 0) {
+            x = setTimeout(() => {
                 timerDisplay.textContent = getTimeRemaining();
+                time--;
                 loop();
             }, 1000);
         }
@@ -178,6 +185,7 @@ function loop() {
 //countdown until next timer starts
 function timerSwitch() {
     timerSkipped = false;
+    clearTimeout(x);
     //doesnt do countdown if timer should stop running
     if ((runCount - 1) > repeatAmountInput.value) {
         resetTimer();
@@ -198,8 +206,6 @@ function timerSwitch() {
 
 //timer logic, calculates how much time is remaining on timer and outputs to screen
 function getTimeRemaining() {
-    //console.log('this part too');
-    var timeRemainingOutput;
     var hours = Math.floor(time / 3600);
     var minutes = Math.floor(time / 60);
     if(minutes >= 60) {
@@ -208,10 +214,10 @@ function getTimeRemaining() {
     var seconds = Math.floor(time % 60);
 
     if (hours <= 0) {
-        timeRemainingOutput = `${('00' + minutes).slice(-2)}:${('00' + seconds).slice(-2)}`;
+        var timeRemainingOutput = `${('00' + minutes).slice(-2)}:${('00' + seconds).slice(-2)}`;
     }
     else {
-        timeRemainingOutput = `${('00' + hours).slice(-2)}:${('00' + minutes).slice(-2)}:${('00' + seconds).slice(-2)}`;
+        var timeRemainingOutput = `${('00' + hours).slice(-2)}:${('00' + minutes).slice(-2)}:${('00' + seconds).slice(-2)}`;
     }
     
     return timeRemainingOutput;
