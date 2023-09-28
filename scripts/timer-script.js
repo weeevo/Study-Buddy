@@ -99,10 +99,10 @@ function pauseTimer() {
             pauseButton.textContent = 'Pause';
             timerPaused = false;
             if(nextTimer == 'Break') {
-            timerHeader.textContent = 'Work Time Remaining';
+                timerHeader.textContent = 'Work Time Remaining';
             }
             else {
-            timerHeader.textContent = 'Break Time Remaining';
+                timerHeader.textContent = 'Break Time Remaining';
             }
             loop();
         }
@@ -112,7 +112,6 @@ function pauseTimer() {
 //run when skip button is pressed
 function skipTimer() {
     if (timerIsActive) {
-        clearTimeout(x);
         timerHeader.textContent = 'Timer Skipped';
         timerDisplay.textContent = ('--:--:--');
         timerSkipped = true; //default false, true if timer has been pressed
@@ -157,7 +156,7 @@ function loop() {
     if (timerIsActive) {
         //check if skip button has been pressed every time loop() is called
         if (timerSkipped) { 
-            //getTimeRemaining(hourValue, minuteValue, timeEnd) == '00:00';
+            clearTimeout(x);
             timerDisplay.textContent = ('--:--:--');
             initializeTimer(); //restart timer with increased runCount, skipping timerSwitch and starting next timer
         }
@@ -174,6 +173,7 @@ function loop() {
         //if time has run out, switch to next timer
         else {
             runCount++;
+            clearTimeout(x);
             timerSwitch();
         }
     }   
@@ -185,7 +185,6 @@ function loop() {
 //countdown until next timer starts
 function timerSwitch() {
     timerSkipped = false;
-    clearTimeout(x);
     //doesnt do countdown if timer should stop running
     if ((runCount - 1) > repeatAmountInput.value) {
         resetTimer();
