@@ -10,6 +10,12 @@ body {
     font-size: 27px;
     font-weight: 700;
 }
+.permitted-url-header {
+    text-align: center;
+    color: #151515;
+    font-size: 19px;
+    font-weight: 700;
+}
 .button_row {
     display: flex;
     justify-content: center;

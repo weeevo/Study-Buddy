@@ -1,3 +1,21 @@
+
+chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    var activeTab = tabs[0];
+    var activeTabURL = activeTab.url;
+    var activeHost = getHostnameFromUrl(activeTabURL);
+
+    document.getElementById('activeTabURL').textContent = activeHost;
+    switch (activeHost) {
+        case "newtab":
+        case "extensions":
+            document.getElementById('url_zone').style.display = "none";
+            break;
+        default:
+            document.getElementById('url_zone').style.display = "block";
+            break;
+    }
+});
+
 //getting the elements
 const workHourInput = document.getElementById('workHours');
 const workMinuteInput = document.getElementById('workMinutes');
@@ -33,6 +51,18 @@ var nextTimer;
 var timerIsActive = false;
 var timerSkipped = false;
 var timerPaused = false;
+
+
+function getHostnameFromUrl(activeTabUrl) {
+    try {
+        const url = new URL(activeTabUrl);
+        return url.hostname;
+    } catch (error) {
+        // Handle invalid URLs
+        console.error("Invalid URL:", activeTabUrl);
+        return null;
+    }
+}
 
 function initializeTimer() {
     //resetting when timer resets
