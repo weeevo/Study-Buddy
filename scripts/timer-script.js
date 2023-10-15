@@ -1,8 +1,11 @@
 
+var activeHost = "";
+const saveButton = document.getElementById('btnAddHost');
+
 chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     var activeTab = tabs[0];
     var activeTabURL = activeTab.url;
-    var activeHost = getHostnameFromUrl(activeTabURL);
+    activeHost = getHostnameFromUrl(activeTabURL);
 
     document.getElementById('activeTabURL').textContent = activeHost;
     switch (activeHost) {
@@ -14,6 +17,29 @@ chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
             document.getElementById('url_zone').style.display = "block";
             break;
     }
+});
+
+
+
+// // document.addEventListener('DOMContentLoaded', function() {
+
+// //     // // Load the saved value when the options page is opened
+// //     // chrome.storage.sync.get(['savedValue'], function(result) {
+// //     //   userInput.value = result.savedValue || '';
+// //     // });
+  
+    
+// // });
+
+// Save the user's input when the save button is clicked
+saveButton.addEventListener('click', function() {
+    alert("value to save: " + activeHost); 
+    // const valueToSave = userInput.value;
+
+    // chrome.storage.sync.set({ 'savedValue': valueToSave }, function() {
+    //     // Notify the user that the data has been saved
+    //     alert('Value saved: ' + valueToSave);
+    // });
 });
 
 //getting the elements
