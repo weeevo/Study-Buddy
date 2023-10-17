@@ -15,7 +15,8 @@
     "permissions": [
         "activeTab",
         "tabs",
-        "storage"
+        "storage",
+        "webNavigation"
     ],
     "action": {
         "default_popup": "index.html"
@@ -23,7 +24,8 @@
     "content_scripts": [
         {
             "js": [
-                "scripts/timer-script.js"
+                "scripts/timer.js",
+                "scripts/content.js"
             ],
             "matches": [ "<all_urls>" ]
         }

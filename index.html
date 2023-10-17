@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study Buddy Options</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
-    <link rel="stylesheet" href="./index.css">
+    <link rel="stylesheet" href="css/timer.css">
 </head>
 
 <body>
@@ -16,7 +16,7 @@
             <div class="permitted-url-header">Add <span id="activeTabURL" style="color: #db06f3;">tab url</span> to the permitted website list
             </div>
             <div style="text-align: center; margin-top: 10px;">
-                <button id="btnAddHost">Add</button>
+                <button id="btnAddSite">Add</button>
             </div>
             
             <hr>
@@ -92,21 +92,22 @@
             <div class="subrow_links header">
                 Permitted Websites
             </div>
-            <div class="subrow_links header">
-                <input class="link_input" placeholder="Enter URL here..." type="text">
-            </div>
-            <div class="subrow_links header">
-                <div class="button_row">
+            
+
+            <div class=" header">
+                <ul class="site_list" id="siteList"></ul>
+                <!-- <div class="button_row">
                     <button> Add Website </button>
                 </div>
                 <div class="button_row">
                     <button> Remove Website </button>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
 
-    <script src="scripts/timer-script.js"></script>
+    <script src="scripts/timer.js"></script>
+
 
 </body>
 

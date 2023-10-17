@@ -125,7 +125,7 @@ button:active {
 /* style for permitted websites row */
 .row_links {
     justify-content: center;
-    display: flex;
+    /* display: flex; */
     flex-direction: column;
     height: 118px;
     width: 468px;
@@ -148,4 +148,9 @@ button:active {
     height: 32px;
     border: 1px solid #A0A0A0;
     background: #FEFEFE;
+}
+.site_list {
+    color: #151515;
+    font-size: 16px;
+    
 }

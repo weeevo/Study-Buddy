@@ -1,46 +1,22 @@
 
-var activeHost = "";
-const saveButton = document.getElementById('btnAddHost');
+//application variables
+var activeTabHostname = ""; //this is the host name of the tab the user is currently on
+var permittedSites = []; //this will hold the array of user added permitted sites
 
-chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-    var activeTab = tabs[0];
-    var activeTabURL = activeTab.url;
-    activeHost = getHostnameFromUrl(activeTabURL);
+//declaring counters
+var runCount = 0;
+var waitCount = 1;
+var pauseCount = 1;
 
-    document.getElementById('activeTabURL').textContent = activeHost;
-    switch (activeHost) {
-        case "newtab":
-        case "extensions":
-            document.getElementById('url_zone').style.display = "none";
-            break;
-        default:
-            document.getElementById('url_zone').style.display = "block";
-            break;
-    }
-});
+//declaring timer functionality variables
+var x; //setTimeout later
+var time;
+var nextTimer;
+var timerIsActive = false;
+var timerSkipped = false;
+var timerPaused = false;
 
 
-
-// // document.addEventListener('DOMContentLoaded', function() {
-
-// //     // // Load the saved value when the options page is opened
-// //     // chrome.storage.sync.get(['savedValue'], function(result) {
-// //     //   userInput.value = result.savedValue || '';
-// //     // });
-  
-    
-// // });
-
-// Save the user's input when the save button is clicked
-saveButton.addEventListener('click', function() {
-    alert("value to save: " + activeHost); 
-    // const valueToSave = userInput.value;
-
-    // chrome.storage.sync.set({ 'savedValue': valueToSave }, function() {
-    //     // Notify the user that the data has been saved
-    //     alert('Value saved: ' + valueToSave);
-    // });
-});
 
 //getting the elements
 const workHourInput = document.getElementById('workHours');
@@ -59,25 +35,127 @@ const resetButton = document.getElementById('resetButton');
 const pauseButton = document.getElementById('pauseButton');
 const skipButton = document.getElementById('skipButton');
 
+const addSiteButton = document.getElementById('btnAddSite');
+
+const siteList = document.getElementById("siteList");
+
+
+
+
+
+
+
+
+
+// // document.addEventListener('DOMContentLoaded', function() {
+
+// //     // // Load the saved value when the options page is opened
+// //     // chrome.storage.sync.get(['savedValue'], function(result) {
+// //     //   userInput.value = result.savedValue || '';
+// //     // });
+  
+    
+// // });
+
+//this function is called when the html page is loaded
+document.addEventListener('DOMContentLoaded', function() {
+
+
+    chrome.storage.sync.get(['permittedSites'], function(result) {
+        permittedSites = result.permittedSites;
+        //alert('sites loaded: ' + permittedSites);
+        permittedSites.forEach(function(site) {
+            var listItem = document.createElement("li");
+            listItem.textContent = site;
+            siteList.appendChild(listItem);
+        });
+
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            var activeTab = tabs[0];
+            var activeTabURL = activeTab.url;
+            activeTabHostname = getHostnameFromUrl(activeTabURL);
+            document.getElementById('activeTabURL').textContent = activeTabHostname;
+        
+            if (permittedSites.includes(activeTabHostname)) {
+                //alert(activeTabHostname + " is in the array.");
+                document.getElementById('url_zone').style.display = "none";
+            } else {
+                //alert(activeTabHostname + " is not in the array.");
+                switch (activeTabHostname) {
+                    case "newtab":
+                    case "extensions":
+                        document.getElementById('url_zone').style.display = "none";
+                        break;
+                    default:
+                        document.getElementById('url_zone').style.display = "block";
+                        break;
+                }
+                
+                chrome.tabs.executeScript(activeTab.id, {
+                    code: `
+                        // Create a div element for the blank screen
+                        const blankScreen = document.createElement('div');
+                        blankScreen.style.position = 'fixed';
+                        blankScreen.style.top = '0';
+                        blankScreen.style.left = '0';
+                        blankScreen.style.width = '100%';
+                        blankScreen.style.height = '100%';
+                        blankScreen.style.background = 'white'; // Set the background color you want
+                        blankScreen.style.zIndex = '9999'; // A high z-index to cover everything
+     
+                        // Inject the div into the page
+                        document.body.appendChild(blankScreen);
+                    `
+                });
+                
+              }
+
+
+            
+            
+        });
+
+        
+
+    });
+
+    alert 
+    
+
+    
+
+
+});
+
 //event listeners
-startButton.addEventListener("click", initializeTimer, false);
-resetButton.addEventListener("click", resetTimer, false);
-pauseButton.addEventListener("click", pauseTimer, false);
-skipButton.addEventListener("click", skipTimer, false);
+startButton.addEventListener("click", initializeTimer);
+resetButton.addEventListener("click", resetTimer);
+pauseButton.addEventListener("click", pauseTimer);
+skipButton.addEventListener("click", skipTimer);
+addSiteButton.addEventListener("click", addPermittedSite);
 
-//declaring counters
-var runCount = 0;
-var waitCount = 1;
-var pauseCount = 1;
 
-//declaring timer functionality variables
-var x; //setTimeout later
-var time;
-var nextTimer;
-var timerIsActive = false;
-var timerSkipped = false;
-var timerPaused = false;
 
+
+
+
+
+function addPermittedSite(){
+    
+
+    //add new value to the beginning of the array
+    permittedSites.unshift(activeTabHostname);
+    
+    //alert("new sites: " + permittedSites);
+    
+    
+    //save array to storage
+    chrome.storage.sync.set({ 'permittedSites': permittedSites }, function() {
+        // Notify the user that the data has been saved
+        alert('Value saved: ' + permittedSites);
+    });
+}
+    
 
 function getHostnameFromUrl(activeTabUrl) {
     try {
