@@ -60,6 +60,56 @@ const siteList = document.getElementById("siteList");
 //this function is called when the html page is loaded
 document.addEventListener('DOMContentLoaded', function() {
 
+    
+
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+        //alert('hi');
+        var activeTab = tabs[0];
+        
+        var activeTabURL = activeTab.url;
+        activeTabHostname = getHostnameFromUrl(activeTabURL);
+        document.getElementById('activeTabURL').textContent = activeTabHostname;
+    
+        if (permittedSites.includes(activeTabHostname)) {
+            //alert(activeTabHostname + " is in the array.");
+            document.getElementById('url_zone').style.display = "none";
+        } else {
+            //alert(activeTabHostname + " is not in the array.");
+            switch (activeTabHostname) {
+                case "newtab":
+                case "extensions":
+                    document.getElementById('url_zone').style.display = "none";
+                    break;
+                default:
+                    document.getElementById('url_zone').style.display = "block";
+                    break;
+            }
+            
+            // chrome.tabs.executeScript(activeTab.id, {
+            //     code: `
+            //         // Create a div element for the blank screen
+            //         const blankScreen = document.createElement('div');
+            //         blankScreen.style.position = 'fixed';
+            //         blankScreen.style.top = '0';
+            //         blankScreen.style.left = '0';
+            //         blankScreen.style.width = '100%';
+            //         blankScreen.style.height = '100%';
+            //         blankScreen.style.background = 'white'; // Set the background color you want
+            //         blankScreen.style.zIndex = '9999'; // A high z-index to cover everything
+ 
+            //         // Inject the div into the page
+            //         document.body.appendChild(blankScreen);
+            //     `
+            // });
+            
+          }
+
+
+        
+        
+    });
+
+
 
     chrome.storage.sync.get(['permittedSites'], function(result) {
         permittedSites = result.permittedSites;
@@ -70,56 +120,12 @@ document.addEventListener('DOMContentLoaded', function() {
             siteList.appendChild(listItem);
         });
 
-        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-            var activeTab = tabs[0];
-            var activeTabURL = activeTab.url;
-            activeTabHostname = getHostnameFromUrl(activeTabURL);
-            document.getElementById('activeTabURL').textContent = activeTabHostname;
         
-            if (permittedSites.includes(activeTabHostname)) {
-                //alert(activeTabHostname + " is in the array.");
-                document.getElementById('url_zone').style.display = "none";
-            } else {
-                //alert(activeTabHostname + " is not in the array.");
-                switch (activeTabHostname) {
-                    case "newtab":
-                    // case "extensions":
-                    //     document.getElementById('url_zone').style.display = "none";
-                    //     break;
-                    default:
-                        document.getElementById('url_zone').style.display = "block";
-                        break;
-                }
-                
-                // chrome.tabs.executeScript(activeTab.id, {
-                //     code: `
-                //         // Create a div element for the blank screen
-                //         const blankScreen = document.createElement('div');
-                //         blankScreen.style.position = 'fixed';
-                //         blankScreen.style.top = '0';
-                //         blankScreen.style.left = '0';
-                //         blankScreen.style.width = '100%';
-                //         blankScreen.style.height = '100%';
-                //         blankScreen.style.background = 'white'; // Set the background color you want
-                //         blankScreen.style.zIndex = '9999'; // A high z-index to cover everything
-     
-                //         // Inject the div into the page
-                //         document.body.appendChild(blankScreen);
-                //     `
-                // });
-                
-              }
-
-
-            
-            
-        });
-
         
 
     });
 
-    alert 
+
     
 
     
