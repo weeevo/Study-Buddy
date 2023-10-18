@@ -10,8 +10,8 @@
 
 <body>
     <div>
-
-        <!-- Tab URL -->
+        <!--
+        Tab URL 
         <div id="url_zone">
             <div class="permitted-url-header">Add <span id="activeTabURL" style="color: #db06f3;">tab url</span> to the permitted website list
             </div>
@@ -21,7 +21,7 @@
             
             <hr>
         </div>
-
+        -->
         <!-- timers -->
         <div class="row_timers">
             <div class="subrow_timers">
@@ -92,16 +92,22 @@
             <div class="subrow_links header">
                 Permitted Websites
             </div>
-            
-
-            <div class=" header">
-                <ul class="site_list" id="siteList"></ul>
-                <!-- <div class="button_row">
-                    <button> Add Website </button>
+            <div class="subrow_links">
+                <div class="column_add">
+                    <div id="url_zone">
+                        <div class="permitted-url-header">Add</div>
+                        <div class="permitted-url-header"><span id="activeTabURL" style="color: #0E55C0;">tab url</span> ?</div>
+                        <div style="text-align: center; margin-top: 10px;">
+                            <button id="btnAddSite">Add</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="button_row">
-                    <button> Remove Website </button>
-                </div> -->
+                <div class="column_links"> 
+                    <div class="link_input">
+                        <ul class="site_list" id="siteList"></ul>
+                    </div>
+                </div>
+                <div class="column_links"></div> <!-- blank column for spacing-->
             </div>
         </div>
     </div>
