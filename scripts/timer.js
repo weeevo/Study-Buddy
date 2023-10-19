@@ -1,4 +1,3 @@
-
 //application variables
 var activeTabHostname = ""; //this is the host name of the tab the user is currently on
 var permittedSites = []; //this will hold the array of user added permitted sites
@@ -15,8 +14,6 @@ var nextTimer;
 var timerIsActive = false;
 var timerSkipped = false;
 var timerPaused = false;
-
-
 
 //getting the elements
 const workHourInput = document.getElementById('workHours');
@@ -39,41 +36,28 @@ const addSiteButton = document.getElementById('btnAddSite');
 
 const siteList = document.getElementById("siteList");
 
-
-
-
-
-
-
-
-
-// // document.addEventListener('DOMContentLoaded', function() {
-
-// //     // // Load the saved value when the options page is opened
-// //     // chrome.storage.sync.get(['savedValue'], function(result) {
-// //     //   userInput.value = result.savedValue || '';
-// //     // });
-  
-    
-// // });
+// document.addEventListener('DOMContentLoaded', function() {
+//     //Load the saved value when the options page is opened
+//     chrome.storage.sync.get(['savedValue'], function(result) {
+//         userInput.value = result.savedValue || '';
+//      });   
+// });
 
 //this function is called when the html page is loaded
-document.addEventListener('DOMContentLoaded', function() {
-
-    
-
+document.addEventListener('DOMContentLoaded', function() {    
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         //alert('hi');
         var activeTab = tabs[0];
-        
         var activeTabURL = activeTab.url;
+
         activeTabHostname = getHostnameFromUrl(activeTabURL);
         document.getElementById('activeTabURL').textContent = activeTabHostname;
     
         if (permittedSites.includes(activeTabHostname)) {
             //alert(activeTabHostname + " is in the array.");
             document.getElementById('url_zone').style.display = "none";
-        } else {
+        } 
+        else {
             //alert(activeTabHostname + " is not in the array.");
             switch (activeTabHostname) {
                 case "newtab":
@@ -83,8 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 default:
                     document.getElementById('url_zone').style.display = "block";
                     break;
-            }
-            
+            }   
             // chrome.tabs.executeScript(activeTab.id, {
             //     code: `
             //         // Create a div element for the blank screen
@@ -98,19 +81,10 @@ document.addEventListener('DOMContentLoaded', function() {
             //         blankScreen.style.zIndex = '9999'; // A high z-index to cover everything
  
             //         // Inject the div into the page
-            //         document.body.appendChild(blankScreen);
-            //     `
-            // });
-            
-          }
-
-
-        
-        
+            //         document.body.appendChild(blankScreen);     `
+            // });    
+          }    
     });
-
-
-
     chrome.storage.sync.get(['permittedSites'], function(result) {
         permittedSites = result.permittedSites;
         //alert('sites loaded: ' + permittedSites);
@@ -119,18 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
             listItem.textContent = site;
             siteList.appendChild(listItem);
         });
-
-        
-        
-
     });
-
-
-    
-
-    
-
-
 });
 
 //event listeners
@@ -140,21 +103,10 @@ pauseButton.addEventListener("click", pauseTimer);
 skipButton.addEventListener("click", skipTimer);
 addSiteButton.addEventListener("click", addPermittedSite);
 
-
-
-
-
-
-
 function addPermittedSite(){
-    
-
     //add new value to the beginning of the array
     permittedSites.unshift(activeTabHostname);
-    
     //alert("new sites: " + permittedSites);
-    
-    
     //save array to storage
     chrome.storage.sync.set({ 'permittedSites': permittedSites }, function() {
         // Notify the user that the data has been saved
@@ -162,7 +114,6 @@ function addPermittedSite(){
     });
 }
     
-
 function getHostnameFromUrl(activeTabUrl) {
     try {
         const url = new URL(activeTabUrl);
