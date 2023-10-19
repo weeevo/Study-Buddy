@@ -132,9 +132,17 @@ button:active {
     border: 1px solid rgba(201, 201, 201, 1);
     background: rgba(209, 209, 209, 0);
 }
+.subrow_header {
+    margin-bottom: 1px;
+    height: 30%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+}
 .subrow_links {
     margin-bottom: 1px;
-    height: 42%;
+    height: 45;
     justify-content: center;
     align-items: center;
     display: flex;
@@ -152,7 +160,7 @@ button:active {
 }
 .link_input {
     height: 82px;
-    width: 250px;
+    width: 251px;
     font-size: 18px;
     font-weight: 400;
     text-align: left;
