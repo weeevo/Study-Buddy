@@ -51,8 +51,13 @@ document.addEventListener('DOMContentLoaded', function() {
         var activeTabURL = activeTab.url;
 
         activeTabHostname = getHostnameFromUrl(activeTabURL);
-        document.getElementById('activeTabURL').textContent = activeTabHostname;
-    
+        if(activeTabHostname.startsWith('www', 0)){
+            document.getElementById('activeTabURL').textContent = activeTabHostname.slice(4);//slice removes www. from front of url
+        }
+        else{
+            document.getElementById('activeTabURL').textContent = activeTabHostname;
+        }
+
         if (permittedSites.includes(activeTabHostname)) {
             //alert(activeTabHostname + " is in the array.");
             document.getElementById('url_zone').style.display = "none";
