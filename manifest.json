@@ -11,7 +11,7 @@
     },
     "background": {
         "service_worker": "background.js"
-    },
+      },
     "permissions": [
         "activeTab",
         "tabs",
@@ -19,12 +19,12 @@
         "webNavigation"
     ],
     "action": {
-        "default_popup": "index.html"
+        "default_popup": "test.html"
       },
     "content_scripts": [
         {
             "js": [
-                "scripts/timer.js",
+                "scripts/test.js",
                 "scripts/content.js"
             ],
             "matches": [ "<all_urls>" ]

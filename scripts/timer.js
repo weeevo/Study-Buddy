@@ -43,6 +43,10 @@ const siteList = document.getElementById("siteList");
 //      });   
 // });
 
+
+
+
+  
 //this function is called when the html page is loaded
 document.addEventListener('DOMContentLoaded', function() {    
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {

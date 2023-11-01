@@ -3,7 +3,7 @@ body {
     font-family: Lato;
     background-color: rgba(224, 224, 224, 1);
     width: 470px;
-    height: 500px;
+    height: 50px;
 }
 .header {
     color: #151515;
@@ -24,7 +24,7 @@ body {
     width: 100%;
 }
 button {
-    width: 135px;
+    /* width: 135px; */
     height: 28px;
     border: 1px solid #9E9E9E;
     background: #C1C1C1;

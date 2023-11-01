@@ -10,3 +10,23 @@
 //         }
 //     });
 // });
+
+let contentBlockingEnabled = false;
+console.log("check 2");
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'toggleBlocking') {
+    contentBlockingEnabled = !contentBlockingEnabled;
+    sendResponse({ enabled: contentBlockingEnabled });
+  }
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (contentBlockingEnabled && changeInfo.status === 'complete') {
+    chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      function: () => {
+        chrome.runtime.sendMessage({ action: 'blockContent' });
+      }
+    });
+  }
+});
