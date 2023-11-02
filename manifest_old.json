@@ -1,0 +1,33 @@
+{
+    "manifest_version": 3,
+    "name": "Productivity Timer",
+    "version": "0.5",
+    "description": "Pomodoro-esque productivity timer, configurable to your liking!",
+    "icons": {
+        "16": "images/icon-48.png",
+        "32": "images/icon-48.png",
+        "48": "images/icon-48.png",
+        "128": "images/icon-48.png"
+    },
+    "background": {
+        "service_worker": "background.js"
+      },
+    "permissions": [
+        "activeTab",
+        "tabs",
+        "storage",
+        "webNavigation"
+    ],
+    "action": {
+        "default_popup": "test.html"
+      },
+    "content_scripts": [
+        {
+            "js": [
+                "scripts/test.js",
+                "scripts/content.js"
+            ],
+            "matches": [ "<all_urls>" ]
+        }
+    ]
+}

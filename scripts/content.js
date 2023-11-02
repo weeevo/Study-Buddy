@@ -1,14 +1,18 @@
-console.log("check 3");
-
+alert("hello");
 function isHostnameAllowed() {
     // Implement logic to check if the current tab's hostname is allowed by the user
-    // Return true if allowed, false otherwise
     const hostname = window.location.hostname;
     console.log('Current hostname:', hostname);
-    return false;
+  
+    // For testing purposes, always return false
+    const isAllowed = false; // Change this to your actual logic
+    console.log('Is allowed:', isAllowed);
+  
+    return isAllowed;
   }
   
   function blockPageContent() {
+    console.log("starting to block");
     // Inject a div element with a black background over the entire page
     const overlay = document.createElement('div');
     overlay.style.position = 'fixed';
@@ -22,9 +26,19 @@ function isHostnameAllowed() {
   }
   
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    alert("test");
     if (message.action === 'blockContent') {
-      if (!isHostnameAllowed()) {
+        console.log('Received message to block content');
+        if (!isHostnameAllowed()) {
         blockPageContent();
       }
     }
   });
+
+//   chrome.scripting.executeScript({
+//     target: { tabId: tab.id },
+//     func: () => {
+//       // write your code here
+//       document.body.style.backgroundColor = "red";
+//     },
+//   });

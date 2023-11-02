@@ -1,32 +1,38 @@
-// chrome.webNavigation.onCompleted.addListener(function(details) {
-//     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-//         const tab = tabs[0];
-//         const stringToMatch = 'google.com'; // Replace with the string you want to check
-        
-//         if (tab && tab.url) {
-//             if (!tab.url.startsWith('chrome-extension://') && tab.url.includes(stringToMatch)) {
-//                 chrome.tabs.executeScript(tab.id, { file: "scripts/content.js" });
-//             }
-//         }
-//     });
-// });
-
-let contentBlockingEnabled = false;
-console.log("check 2");
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'toggleBlocking') {
-    contentBlockingEnabled = !contentBlockingEnabled;
-    sendResponse({ enabled: contentBlockingEnabled });
-  }
-});
-
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (contentBlockingEnabled && changeInfo.status === 'complete') {
+    if (message.action === 'toggleBlocking') {
+      console.log('Received message to toggle content blocking');
+      sendResponse({ enabled: true }); // Change the response based on your logic
+    }
+  });
+  
+  chrome.tabs.onActivated.addListener((tabId, changeInfo, tab) => {
+    console.log('Tab updated:', tabId);
     chrome.scripting.executeScript({
-      target: { tabId: tabId },
+      target: { tabId: tab.id },
       function: () => {
         chrome.runtime.sendMessage({ action: 'blockContent' });
       }
     });
-  }
-});
+
+
+    // chrome.tabs.query({
+    //     active: true,
+    //     lastFocusedWindow: true
+    // }, function(tabs) {
+    //     // and use that tab to fill in out title and url
+    //     var tab = tabs[0];
+    //     console.log(tab.url);
+    //     // alert(tab.url);
+
+    //     chrome.scripting.executeScript({
+    //         target: { tabId: tab.id },
+    //         function: () => {
+    //         chrome.runtime.sendMessage({ action: 'blockContent' });
+    //         }
+    //     });
+
+
+    });
+
+
+//   });
