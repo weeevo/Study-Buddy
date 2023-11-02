@@ -1,4 +1,4 @@
-alert("hello");
+
 function isHostnameAllowed() {
     // Implement logic to check if the current tab's hostname is allowed by the user
     const hostname = window.location.hostname;
@@ -26,14 +26,17 @@ function isHostnameAllowed() {
   }
   
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    alert("test");
     if (message.action === 'blockContent') {
+        alert("content block");
         console.log('Received message to block content');
         if (!isHostnameAllowed()) {
         blockPageContent();
       }
     }
   });
+
+
+
 
 //   chrome.scripting.executeScript({
 //     target: { tabId: tab.id },
