@@ -1,8 +1,21 @@
+var internal_blocking_state = false;
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'toggleBlocking') {
       console.log('Received message to toggle content blocking');
-      sendResponse({ enabled: true }); // Change the response based on your logic
+      console.log('Received state: ' + message.state);
+      if (message.state === 'enabled') {
+        internal_blocking_state = true;
+      } else {
+        internal_blocking_state = false;
+      }
+      
+      
+      sendResponse({ enabled: internal_blocking_state }); // Change the response based on your logic
     }
+
+
+
 });
   
 
