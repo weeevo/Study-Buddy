@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('url_zone').style.display = "none";
                     break;
                 default:
-                    document.getElementById('url_zone').style.display = "block";
+                    document.getElementById('url_zone').style.display = "flex";
                     break;
             }   
             // chrome.tabs.executeScript(activeTab.id, {

@@ -9,10 +9,7 @@
 </head>
 
 <body>
-    <div>
-        <!--
-        Tab URL 
-        <div id="url_zone">
+    <!-- <div id="url_zone">
             <div class="permitted-url-header">Add <span id="activeTabURL" style="color: #db06f3;">tab url</span> to the permitted website list
             </div>
             <div style="text-align: center; margin-top: 10px;">
@@ -22,82 +19,50 @@
             <hr>
         </div>
         -->
-        <!-- timers -->
-        <div class="row_timers">
-            <div class="subrow_timers">
-                <div class="column_timers header">Work Timer</div>
-                <div class="column_timers header">Break Timer</div>
-            </div>
-            <div class="subrow_timers">
-                <div class="column_timers">
-                    <input class="timer_input" placeholder="hr" type="number" min="0" id="workHours">
-                    <input class="timer_input" placeholder="min" type="number" min="0" max="59" id="workMinutes">
-                </div>
-                <div class="column_timers">
-                    <input class="timer_input" placeholder="hr" type="number" min="0" id="breakHours">
-                    <input class="timer_input" placeholder="min" type="number" min="0" max="59" id="breakMinutes">
-                </div>
-            </div>
-            <div class="subrow_timers">
-                <div class="button_row">
-                    <button id="startButton">Start</button>
-                </div>
-                <div class="button_row">
-                    <button id="resetButton">Reset</button>
-                </div>
-                <div class="button_row">
-                    <div class="repeat_dropdown">
-                        <label>Repeat:</label>
-                        <select id="repeatAmount">
-                            <option value="0">0x</option>
-                            <option value="1">1x</option>
-                            <option value="2">2x</option>
-                            <option value="3">3x</option>
-                            <option value="4">4x</option>
-                            <option value="5">5x</option>
-                        </select>
-                    </div>
-                </div>
+    <!-- timers -->
+    <div class="row">
+        <div class="header">Work Timer</div>
+        <div class="header">Break Timer</div>
+        <div class="column_timers">
+            <input class="timer_input" placeholder="hr" type="number" min="0" id="workHours">
+            <input class="timer_input" placeholder="min" type="number" min="0" max="59" id="workMinutes">
+        </div>
+        <div class="column_timers">
+            <input class="timer_input" placeholder="hr" type="number" min="0" id="breakHours">
+            <input class="timer_input" placeholder="min" type="number" min="0" max="59" id="breakMinutes">
+        </div>
+        <div class="fullwidth">
+            <button id="startButton">Start</button>
+            <button id="resetButton">Reset</button>
+            <div class="repeat_dropdown">
+                <label>Repeat:</label>
+                <select id="repeatAmount">
+                    <option value="0">0x</option>
+                    <option value="1">1x</option>
+                    <option value="2">2x</option>
+                    <option value="3">3x</option>
+                    <option value="4">4x</option>
+                    <option value="5">5x</option>
+                </select>
             </div>
         </div>
-
-        <p></p> <!-- blank paragraph for spacing-->
-
-        <!-- time remaining-->
-        <div class="row_timeRemaining">
-            <div id="timerHeader" class="subrow_timeRemaining header">Press 'Start' to Begin</div>
-            <div id="timerDisplay" class="subrow_clock clock">--:--:--</div>
-            <div class="subrow_timeRemaining">
-                <div id="timerButtons" class="clock_buttons">
-                    <button id="pauseButton">Pause</button>
-                </div>
-                <div id="timerButtons" class="clock_buttons">
-                    <button id="skipButton">Skip</button>
-                </div>
-            </div>
+    </div>
+    <!-- time remaining-->
+    <div class="row">
+        <div id="timerHeader" class="header fullwidth">Press 'Start' to Begin</div>
+        <div id="timerDisplay" class="clock fullwidth">--:--:--</div>
+        <button id="pauseButton">Pause</button>
+        <button id="skipButton">Skip</button>
+    </div>
+    <!-- permitted websites-->
+    <div class="row">
+        <div class="header fullwidth">Permitted Websites</div>
+        <div class="fullwidth" style="justify-content: center; gap: 1rem" id="url_zone">
+            <p>Add <span id="activeTabURL" style="color: #0E55C0;">tab url</span>?</p> <button id="btnAddSite">Add</button>
         </div>
-
-        <p></p> <!-- blank paragraph for spacing-->
-
-        <!-- permitted websites-->
-        <div class="row_links">
-            <div class="subrow_header header">Permitted Websites</div>
-            <div class="subrow_links">
-                <div class="column_add">
-                    <div id="url_zone">
-                        <div class="permitted-url-header">Add</div>
-                        <div class="permitted-url-header"><span id="activeTabURL" style="color: #0E55C0;">tab url</span> ?</div>
-                        <div style="text-align: center; margin-top: 10px;">
-                            <button id="btnAddSite">Add</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="column_links"> 
-                    <div class="link_input">
-                        <ul class="site_list" id="siteList"></ul>
-                    </div>
-                </div>
-                <div class="column_links"></div> <!-- blank column for spacing-->
+        <div class="fullwidth">
+            <div class="link_input">
+                <ul class="site_list" id="siteList"></ul>
             </div>
         </div>
     </div>
