@@ -46,11 +46,11 @@ const siteList = document.getElementById("siteList");
 //this function is called when the html page is loaded
 document.addEventListener('DOMContentLoaded', function() {    
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-        //alert('hi');
+        // alert('hi');
         var activeTab = tabs[0];
         var activeTabURL = activeTab.url;
 
-        activeTabHostname = getHostnameFromUrl(activeTabURL);
+        activeTabHostname = getHostnameFromUrl(activeTabURL);   
         if(activeTabHostname.startsWith('www', 0)){
             activeTabHostname = activeTabHostname.slice(4);//slice removes www. from front of url
         }

@@ -32,8 +32,8 @@ p {
     margin: 0;
     text-align: center;
     color: #151515;
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-size: 1rem;
+    font-weight: 400;
 }
 
 .row{
@@ -61,7 +61,6 @@ button, .repeat_dropdown {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: .5rem;
     width: 135px;
     height: 28px;
     border: 1px solid #9E9E9E;
