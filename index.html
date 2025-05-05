@@ -9,18 +9,8 @@
 </head>
 
 <body>
-    <!-- <div id="url_zone">
-            <div class="permitted-url-header">Add <span id="activeTabURL" style="color: #db06f3;">tab url</span> to the permitted website list
-            </div>
-            <div style="text-align: center; margin-top: 10px;">
-                <button id="btnAddSite">Add</button>
-            </div>
-            
-            <hr>
-        </div>
-        -->
     <!-- timers -->
-    <div class="row">
+    <!-- <div class="row" style="display: none;">
         <div class="header">Work Timer</div>
         <div class="header">Break Timer</div>
         <div class="column_timers">
@@ -46,19 +36,19 @@
                 </select>
             </div>
         </div>
-    </div>
+    </div> -->
     <!-- time remaining-->
-    <div class="row">
+    <!-- <div class="row" style="display: none;">
         <div id="timerHeader" class="header fullwidth">Press 'Start' to Begin</div>
         <div id="timerDisplay" class="clock fullwidth">--:--:--</div>
         <button id="pauseButton">Pause</button>
         <button id="skipButton">Skip</button>
-    </div>
+    </div> -->
     <!-- permitted websites-->
     <div class="row">
         <div class="header fullwidth">Permitted Websites</div>
         <div class="fullwidth" style="justify-content: center; gap: 1rem" id="url_zone">
-            <button id="btnAddSite">
+            <button id="btnAddSite" style="width: fit-content; padding-inline: .5rem">
                 <p>Add <span id="activeTabURL" style="color: #0E55C0;">tab url</span>?</p>
             </button>
         </div>
@@ -68,10 +58,7 @@
             </div>
         </div>
     </div>
-
-    <script src="scripts/timer.js"></script>
-
-
 </body>
+<script src="scripts/timer.js"></script>
 
 </html>
