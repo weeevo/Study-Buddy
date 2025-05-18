@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/colors.css" type="text/css">
+    <link rel="stylesheet" href="../css/popup.css" type="text/css">
+    <!-- fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sofia+Sans+Condensed:ital,wght@0,1..1000;1,1..1000&display=swap">
+</head>
+
+<body>
+    <!-- navbar -->
+    <div class="tabs">
+        <div id="timerTab" class="tab activeTab">Timer</div>
+        <div id="sitesTab" class="tab">Blocked Sites</div>
+    </div>
+    <!-- timer -->
+    <div id="timer" class="timer">
+        <div class="screen">
+            <!-- set timer screen -->
+            <div class="settings" id="set">
+                <div>
+                    <h1>Work Timer</h1>
+                    <input class="timer_input" placeholder="hr" type="number" min="0" id="workHours"><span>:</span>
+                    <input class="timer_input" placeholder="min" type="number" min="0" max="59" id="workMinutes">
+                </div>
+                <div>
+                    <h1>Break Timer</h1>
+                    <input class="timer_input" placeholder="hr" type="number" min="0" id="breakHours"><span>:</span>
+                    <input class="timer_input" placeholder="min" type="number" min="0" max="59" id="breakMinutes">
+                </div>
+                <div class="repeat" style="grid-column: 1/3;">
+                    <p style="font-family: 'DM Serif Display', serif;">Repeat:</p>
+                    <div>
+                        <input type="radio" name="repeatVal" id="off" value="0" checked>
+                        <label for="off">Off</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="repeatVal" id="once" value="1">
+                        <label for="once">Once</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="repeatVal" id="other">
+                        <label for="other">Other: <input class="repeat_input" type="number" name="" id="otherVal"
+                                placeholder="ex: 4" tabindex="-1"></label>
+                    </div>
+                </div>
+            </div>
+            <!-- display timer screen -->
+            <div class="display" id="display">
+                <div style="display: flex; align-items: center; transform: translateY(10px);">
+                    <h2 id="clock" style="transform: translateY(-5px);">--:--:--</h2>
+                    <div id="currTimer"
+                        style="display: flex; margin-left: 20px; flex-direction: column; align-items: flex-start;">
+                        <p>Left to</p>
+                        <h1 style="margin: 0">Work</h1>
+                    </div>
+                </div>
+                <div id="skipScreen" style="align-items: baseline; justify-content: center; width: 100%; gap: .5rem;">
+                    <p>Timer </p>
+                    <h1 style="margin: 0">Skipped</h1>
+                </div>
+                <div id="switch" style="align-items: baseline; justify-content: center; width: 100%; gap: .5rem;">
+                    <h1 style="margin: 0" id="next"></h1>
+                    <p> Starting</p>
+                </div>
+                <div id="end" style="align-items: baseline; justify-content: center; width: 100%; gap: .5rem;">
+                    <p>Timer </p>
+                    <h1 style="margin: 0">Finished</h1>
+                </div>
+                <p class="repeat" style="justify-content: center; gap: .3rem;">Repeating <em id="repeatsLeft">0</em>
+                    more time(s)</p>
+            </div>
+        </div>
+        <!-- buttons -->
+        <div class="buttons">
+            <button class="yellow" id="start">Start</button>
+            <button class="yellow" style="display: none;" id="stop">Stop</button>
+            <button class="green" id="reset">Reset</button>
+            <button class="red" id="skip">Skip</button>
+        </div>
+    </div>
+    <!-- blocked websites-->
+    <div id="sites" class="sites">
+        <div class="screen">
+            <!-- <h1 style="margin: 0; padding-top: 25px;">Blocked Websites</h1> -->
+            <ul id="siteList"></ul>
+        </div>
+        <div class="buttons">
+            <button class="blue" style="grid-column: 1/4" id="add">
+                <span style="font-size: 1.65rem; font-weight: 400; color: #ffffff;" id="addLabel"></span>
+                <b id="activeTabURL"></b>
+            </button>
+        </div>
+    </div>
+    <!-- footer -->
+    <footer>
+        <a id="colorMode">Switch to Light Mode
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                <path
+                    d="M480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z" />
+            </svg></a>
+    </footer>
+</body>
+<script src="scripts/popup.js"></script>
+
+</html>
