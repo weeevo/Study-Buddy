@@ -1,12 +1,453 @@
-// // Create a div element for the blank screen
-// const blankScreen = document.createElement('div');
-// blankScreen.style.position = 'fixed';
-// blankScreen.style.top = '0';
-// blankScreen.style.left = '0';
-// blankScreen.style.width = '100%';
-// blankScreen.style.height = '100%';
-// blankScreen.style.background = 'white'; // Set the background color you want
-// blankScreen.style.zIndex = '9999'; // A high z-index to cover everything
+(function () {
+  const hostname = window.location.hostname.replace(/^www\./, "");
+  ensureOverlayInjected(0);
+  chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href}, (res) => {
+    if (res.blocked) {
+      ensureOverlayInjected(res.timerData.remainingTime)
+      showOverlay();
+    }
+  });
+})();
 
-// // Inject the div into the page
-// document.body.appendChild(blankScreen);
+// really try hard to inject my overlay 
+function ensureOverlayInjected(remainingTime) {
+  const tryInject = () => {
+    if (!document.getElementById("blocker-host")) {
+      injectBlockingOverlay(remainingTime);
+    }
+  };
+
+  // Retry after 3 seconds in case the page is still initializing
+  setTimeout(tryInject, 3000);
+  requestIdleCallback(tryInject);
+}
+
+// helper function to convert time in ms to hr:min:sec format
+function formatTime(ms) {
+  let totalSeconds = Math.floor(ms / 1000);
+
+  let hours = Math.floor(totalSeconds / 3600);
+  let minutes = Math.floor((totalSeconds % 3600) / 60);
+  let seconds = totalSeconds % 60;
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  } else {
+    return `${minutes}:${String(seconds).padStart(2, "0")}`;
+  }
+}
+
+// injected page content
+function injectBlockingOverlay(remainingTime) {
+  if (document.getElementById("blocker-host")) showOverlay();
+
+  const host = document.createElement("div");
+  host.id = "blocker-host";
+  host.style.position = "fixed";
+  host.style.top = "0";
+  host.style.left = "0";
+  host.style.width = "100vw";
+  host.style.height = "100vh";
+  host.style.zIndex = "2147483647";
+  host.style.display = "none";
+  host.style.opacity = "0"
+  host.style.transition = "opacity .5s ease";
+
+  const shadow = host.attachShadow({ mode: "open" });
+
+  const style = document.createElement("style");
+  style.textContent = `
+    #site-blocker-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      backdrop-filter: blur(10px);
+      background-color: rgba(36, 35, 35, .99);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      z-index: 999998;
+      color: #ffffff;
+      font-size: 100%;
+      transition: all .5s ease;
+    }
+
+    h1{
+      font-family: "DM Serif Display", serif;
+      font-size: 80px !important;
+      line-height: .8;
+      margin-bottom: 20px;
+      margin-top: 0;
+      font-weight: 700;
+    }
+
+    p{
+        font-family: "Sofia Sans Condensed", sans-serif;
+        margin: 0;
+        font-weight: 300;
+        font-size: 40px !important;
+        line-height: 1.1;
+        max-width: 600px;
+    }
+
+    em{
+      font-family: "DM Serif Display", serif;
+      font-style: italic;
+      font-weight: 700;
+    }
+
+    .title{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 32px;
+    }
+    
+    .buttons{
+      z-index: 999999;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 16px;
+      width: 1000px;
+      justify-content: center;
+      background-color: #2e2b2b;
+      padding: 16px;
+      box-sizing: border-box;
+      border-radius: 50px;
+    }
+
+    .button {
+      font-family: "Sofia Sans Condensed", sans-serif;
+      border: 0;
+      font-size: 32px !important;
+      padding: 16px;
+      padding-inline: 20px;
+      border-radius: 100px;
+      transition: all .1s ease;
+      outline-offset: 2px;
+      color: #ffffff;
+    }
+
+    .button:hover{
+      cursor: pointer;
+    }
+
+    footer{
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        box-sizing: border-box;
+        background-color: #2e2b2b;
+        padding-inline: 16px;
+        padding-block: 8px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    #colorMode{
+      font-family: "Sofia Sans Condensed", sans-serif;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 2px;
+        font-size: 24px;
+        font-weight: 200;
+        font-style: italic;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .icon{
+        fill: #ffffff;
+        transform: translateY(-1px) scale(1);
+        width: 30px;
+        margin-left: 5px;
+    }
+
+    .yellow{
+      background: linear-gradient( #edb110, #c78010);
+      box-shadow: inset 0 -6.4px #9b6a1b;
+    }
+
+    .yellow:active{
+        box-shadow: inset 0 6.4px #c59000;
+        transform: translateY(2px);
+    }
+
+    .blue{
+        background: linear-gradient( #2245d3, #1417bb);
+        box-shadow: inset 0 -6.4px #0407a7;
+    }
+
+    .blue:active{
+        box-shadow: inset 0 6.4px #0e2fb1;
+        transform: translateY(2px);
+    }
+
+    .green{
+        background: linear-gradient( #10cb00, #078f00);
+        box-shadow: inset 0 -6.4px #1d740b;
+    }
+
+    .green:active{
+        box-shadow: inset 0 6.4px #0ea506;
+        transform: translateY(2px);
+    }
+
+    .red{
+        background: linear-gradient( #d3191d, #ab1b1b);
+        box-shadow: inset 0 -6.4px #890606;
+    }
+
+    .red:active{
+        box-shadow: inset 0 -6.4px #ab0a0d;
+        transform: translateY(2px);
+    }
+  `;
+
+  const overlay = document.createElement("div");
+  overlay.id = "site-blocker-overlay";
+  overlay.setAttribute("data-theme", "dark")
+  overlay.innerHTML = `
+    <section class="title">
+      <h1><span id="timer-header">It's work time. </span><em id="block-timer">${formatTime(remainingTime)}</em><em> Left</em></h1>
+      <p>This page is being blocked by Study Buddy because it's in the list of blocked sites</p>
+    </section>
+    <section class="buttons">
+      <button id="view-once" class="button yellow">View Once</button>
+      <button id="remove-site" class="button blue">Unblock Site</button>
+      <button id="start-break" class="button green">Start Break</button>
+      <button id="end-timers" class="button red">End Timer</button>
+    </section>
+    <footer>
+      <a id="colorMode">Switch to Light Mode
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+          width="24px">
+          <path d="M480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z" />
+        </svg>
+      </a>
+    </footer>
+  `;
+
+  shadow.appendChild(style);
+  shadow.appendChild(overlay);
+  getTheme(shadow);
+  document.documentElement.appendChild(host);
+
+  // Button actions
+  shadow.getElementById("remove-site").onclick = () => {
+    chrome.runtime.sendMessage({ action: "toggleBlockSite", url: window.location.href });
+    removeOverlay();
+  };
+
+  shadow.getElementById("view-once").onclick = () => {
+    viewOnce();
+  };
+
+  shadow.getElementById("start-break").onclick = () => {
+    chrome.runtime.sendMessage({ action: "skipTimer" });
+    removeOverlay();
+  };
+
+  shadow.getElementById("end-timers").onclick = () => {
+    chrome.runtime.sendMessage({ action: "resetTimer" });
+    removeOverlay();
+  };
+
+  shadow.getElementById("colorMode").onclick = () => {
+    currentThemeSetting = shadow.querySelector("#site-blocker-overlay").getAttribute("data-theme");
+    let newTheme = currentThemeSetting === "dark" ? "light" : "dark";
+
+    if (newTheme == "dark") { changeToDark(shadow) }
+    else { changeToLight(shadow) }
+
+    shadow.querySelector("#site-blocker-overlay").setAttribute("data-theme", newTheme);
+    chrome.runtime.sendMessage({
+      action: "saveTheme",
+      theme: newTheme,
+    });
+  }
+
+  // Countdown updater
+  let interval = setInterval(() => {
+    const timerEl = shadow.getElementById("block-timer");
+    const timerh1 = shadow.getElementById("timer-header");
+    let blocked = true;
+    chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href}, (res) => {
+      if (!res.blocked) {
+        removeOverlay();
+        blocked = false;
+      }
+    });
+    chrome.runtime.sendMessage({ action: "getTimerState" }, (res) => {
+      const { timerData } = res;
+      // if(sessionStorage.getItem("viewOnceAllowed") == "true"){
+      //   return;
+      // }
+      if (timerEl) {
+        timerEl.textContent = formatTime(timerData.remainingTime);
+      }
+      if (timerData.paused) {
+        timerh1.textContent = "Timer paused. "
+      }
+      else if (blocked){
+        timerh1.textContent = "It's work time. "
+        showOverlay();
+      }
+    });
+  }, 1000);
+
+  // Observer to prevent removal
+  const observer = new MutationObserver(() => {
+    if (!document.body.contains(host)) {
+      document.body.appendChild(host);
+    }
+  });
+
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+  });
+}
+
+function removeOverlay() {
+  const overlay = document.getElementById("blocker-host");
+  if (overlay) {
+    overlay.style.opacity = "0";
+    setTimeout(() => {
+      overlay.style.display = "none";
+    }, 600);
+  }
+}
+
+function showOverlay() {
+  const overlay = document.getElementById("blocker-host");
+  const hostname = window.location.hostname.replace(/^www\./, "");
+  chrome.runtime.sendMessage({ action: "getTimerState" }, (res) => {
+    const { timerData, blockedSites } = res;
+    const isBlocked =
+      blockedSites.includes(hostname) &&
+      timerData?.isRunning &&
+      timerData?.phase === "Work";
+    if (isBlocked && overlay) {
+      if (overlay) {
+          overlay.style.opacity = "1";
+          setTimeout(() => {
+            overlay.style.display = "block";
+          }, 600);
+        }
+      }
+    else if (isBlocked) {
+      ensureOverlayInjected(timerData.remainingTime);
+    }
+  });
+}
+
+function viewOnce() {
+  chrome.runtime.sendMessage({ action: "viewOnce"})
+  removeOverlay();
+}
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  switch (message.action) {
+    case "hideOverlay":
+      removeOverlay(); // function to remove/hide overlay
+      break;
+    case "showOverlay":
+      injectBlockingOverlay(); // if you want to re-show it
+      break;
+    case "viewOnce":
+      viewOnce(); // disable overlay just once for this tab
+      break;
+    case "removeFromBlocked":
+      chrome.runtime.sendMessage({ action: "toggleBlockSite", url: window.location.href });
+      break;
+    // add more cases if needed
+  }
+});
+
+// get theme when the overlay first loads
+function getTheme(shadow) {
+  chrome.runtime.sendMessage({ action: "getTheme" }, (response) => {
+    if (response == "dark") { changeToDark(shadow) }
+    else { changeToLight(shadow) }
+  });
+}
+
+// change colors to light mode colors and set theme to light
+function changeToLight(shadow) {
+  shadow.querySelector("#site-blocker-overlay").setAttribute("data-theme", "light");
+  shadow.getElementById("colorMode").innerHTML = 'Switch to Dark Mode <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/></svg>';
+  // changing colors
+  // page and section background color
+  shadow.querySelector("#site-blocker-overlay").style.backgroundColor = "rgba(230, 230, 230, .99)"
+  shadow.querySelector(".buttons").style.backgroundColor = "#f4f5f6"
+  shadow.querySelector("footer").style.backgroundColor = "#f4f5f6"
+
+  // text color
+  shadow.querySelector(".title").style.color = "#000000"
+  shadow.querySelector("#colorMode").style.color = "#000000"
+  shadow.querySelector(".icon").style.fill = "#000000"
+
+  // button colors
+  shadow.querySelector(".yellow").style.background = "linear-gradient( #F8C63F, #E4A238)";
+  shadow.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #CD9131";
+  shadow.querySelector(".yellow").addEventListener("mousedown", () => { shadow.querySelector(".yellow").style.boxShadow = "inset 0 6.4px #D8AB34" });
+  shadow.querySelector(".yellow").addEventListener("mouseup", () => { shadow.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #CD9131" });
+
+  shadow.querySelector(".blue").style.background = "linear-gradient( #3F64F8, #383BE4)";
+  shadow.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #3134CD";
+  shadow.querySelector(".blue").addEventListener("mousedown", () => { shadow.querySelector(".blue").style.boxShadow = "inset 0 6.4px #3455D8" });
+  shadow.querySelector(".blue").addEventListener("mouseup", () => { shadow.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #3134CD" });
+
+  shadow.querySelector(".green").style.background = "linear-gradient( #55D34A, #34A92E)";
+  shadow.querySelector(".green").style.boxShadow = "inset 0 -6.4px #32941E";
+  shadow.querySelector(".green").addEventListener("mousedown", () => { shadow.querySelector(".green").style.boxShadow = "inset 0 6.4px #3FC038" });
+  shadow.querySelector(".green").addEventListener("mouseup", () => { shadow.querySelector(".green").style.boxShadow = "inset 0 -6.4px  #32941E" });
+
+  shadow.querySelector(".red").style.background = "linear-gradient( #E24F52, #C52F2F)";
+  shadow.querySelector(".red").style.boxShadow = "inset 0 -6.4px #BA2222";
+  shadow.querySelector(".red").addEventListener("mousedown", () => { shadow.querySelector(".red").style.boxShadow = "inset 0 6.4px #D9393C" });
+  shadow.querySelector(".red").addEventListener("mouseup", () => { shadow.querySelector(".red").style.boxShadow = "inset 0 -6.4px #BA2222" });
+}
+
+// change colors to dark mode colors and set theme to dark
+function changeToDark(shadow) {
+  shadow.querySelector("#site-blocker-overlay").setAttribute("data-theme", "dark");
+  shadow.getElementById("colorMode").innerHTML = 'Switch to Light Mode <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z"/></svg>';
+  // changing colors
+  // page and section background colors
+  shadow.querySelector("#site-blocker-overlay").style.backgroundColor = "rgba(36, 35, 35, .99)"
+  shadow.querySelector(".buttons").style.backgroundColor = "#2e2b2b"
+  shadow.querySelector("footer").style.backgroundColor = "#2e2b2b";
+
+  //text colors
+  shadow.querySelector(".title").style.color = "#ffffff"
+  shadow.querySelector("#colorMode").style.color = "#ffffff"
+  shadow.querySelector(".icon").style.fill = "#ffffff"
+
+  // button colors
+  shadow.querySelector(".yellow").style.background = "linear-gradient( #edb110, #c78010)";
+  shadow.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #9b6a1b";
+  shadow.querySelector(".yellow").addEventListener("mousedown", () => { shadow.querySelector(".yellow").style.boxShadow = "inset 0 6.4px #c59000" });
+  shadow.querySelector(".yellow").addEventListener("mouseup", () => { shadow.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #9b6a1b" });
+
+  shadow.querySelector(".blue").style.background = "linear-gradient( #2245d3, #1417bb)";
+  shadow.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #0407a7";
+  shadow.querySelector(".blue").addEventListener("mousedown", () => { shadow.querySelector(".blue").style.boxShadow = "inset 0 6.4px #0e2fb1" });
+  shadow.querySelector(".blue").addEventListener("mouseup", () => { shadow.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #0407a7" });
+
+  shadow.querySelector(".green").style.background = "linear-gradient( #10cb00, #078f00)";
+  shadow.querySelector(".green").style.boxShadow = "inset 0 -6.4px #1d740b";
+  shadow.querySelector(".green").addEventListener("mousedown", () => { shadow.querySelector(".green").style.boxShadow = "inset 0 6.4px #0ea506" });
+  shadow.querySelector(".green").addEventListener("mouseup", () => { shadow.querySelector(".green").style.boxShadow = "inset 0 -6.4px  #1d740b" });
+
+  shadow.querySelector(".red").style.background = "linear-gradient( #d3191d, #ab1b1b)";
+  shadow.querySelector(".red").style.boxShadow = "inset 0 -6.4px #890606";
+  shadow.querySelector(".red").addEventListener("mousedown", () => { shadow.querySelector(".red").style.boxShadow = "inset 0 6.4px #ab0a0d" });
+  shadow.querySelector(".red").addEventListener("mouseup", () => { shadow.querySelector(".red").style.boxShadow = "inset 0 -6.4px #890606" });
+}
