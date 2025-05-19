@@ -52,18 +52,29 @@ function injectBlockingOverlay(remainingTime) {
   host.style.width = "100vw";
   host.style.height = "100vh";
   host.style.zIndex = "9999999";
-  host.style.display = "flex";
-  host.style.opacity = "0"
-  host.style.transition = "opacity .5s ease";
+  host.style.display = "none";
+  host.style.pointerEvents = "none";
 
   overlayShadowRoot = host.attachShadow({ mode: "open" });
+  
+  const fontLink = document.createElement("link");
+  const preconnect1 = document.createElement("link");
+  const preconnect2 = document.createElement("link")
+
+  preconnect2.rel = "preconnect";
+  preconnect2.href = "https://fonts.gstatic.com"
+  preconnect2.crossOrigin = "anonymous"
+  preconnect1.rel = "preconnect";
+  preconnect1.href = "https://fonts.googleapis.com";
+  fontLink.rel = "stylesheet";
+  fontLink.href = "https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sofia+Sans+Condensed:ital,wght@0,1..1000;1,1..1000&display=swap";
+
+  document.head.appendChild(preconnect1);
+  document.head.appendChild(preconnect2);
+  document.head.appendChild(fontLink);
 
   const style = document.createElement("style");
   style.textContent = `
-   *{
-      transition: all .25s ease;
-    }
-      
     #site-blocker-overlay {
       position: fixed;
       top: 0; left: 0;
@@ -370,7 +381,7 @@ function injectNotif() {
             background: #242323;
             box-shadow: 0 4px 0 0 #181818;
             border-radius: 0 32px 32px 0;
-            gap: 16px;
+            gap: 24px;
             padding: 12px;
         }
 
@@ -445,10 +456,8 @@ function showNotif(message, dur) {
 function removeOverlay() {
   const overlay = document.getElementById("blocker-host");
   if (overlay) {
-    overlay.style.opacity = "0";
-    // setTimeout(() => {
-    //   overlay.style.display = "none";
-    // }, 600);
+    overlay.style.display = "none";
+    overlay.style.pointerEvents = "none"
   }
 }
 
@@ -460,7 +469,8 @@ function showOverlay() {
 
   if (overlay) {
     // overlay.style.display = "flex";
-    overlay.style.opacity = "1";
+    overlay.style.display = "flex";
+    overlay.style.pointerEvents = "auto"
   }
 }
 
