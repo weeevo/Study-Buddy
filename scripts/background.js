@@ -211,6 +211,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     return true;
   }
+  else if (request.action === "blockSiteFromSearch") {
+    const hostname = request.url;
+    chrome.storage.local.get("blockedSites", (result) => {
+      let list = result.blockedSites || [];
+      const index = list.indexOf(hostname);
+      if (index === -1) {
+        list.push(hostname);
+      }
+      chrome.storage.local.set({ blockedSites: list });
+      sendResponse({ updatedList: list });
+    });
+    return true;
+  }
   else if (request.action === "getBlockedStatus") {
     console.log(sender.tab.id);
     const tabId = sender.tab.id;

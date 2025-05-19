@@ -91,6 +91,8 @@ em{
 
 .sites{
     border-radius: 35px 0 45px 45px;
+    position: relative;
+    z-index: 1000;
 }
 
 .sites .screen{
@@ -242,7 +244,7 @@ h2 {
 
 /* sites  */
 ul{
-    padding-block: .75rem;
+    padding-bottom: .75rem;
 }
 
 li{
@@ -282,6 +284,58 @@ img {
 .list-item{
     display: flex;
     align-items: center;
+}
+
+.URLSearch{
+    display: flex; 
+    gap: .5rem; 
+    position: fixed; 
+    background-color: var(--screen);
+    z-index: 999;
+    width: 405px;
+    border-top-left-radius: 25px;
+    box-shadow: inset 0 0 5px 3px var(--screen-shadow);
+    padding-bottom: calc(8px + .7rem);
+    clip-path: inset(0px 0px 8px 0);
+}
+
+.typeURL, .addURL{
+    font-family: "Sofia Sans Condensed", sans-serif;
+    font-weight: 200;
+    color: var(--text);
+    font-size: 1.5rem;
+    display: flex;
+    justify-content: center;
+    background-color: var(--list-light);
+    align-items: center;
+    box-sizing: border-box;
+    padding-block: 4px;
+    text-align: left;
+    list-style-type: none;
+    padding-inline: .5rem;
+    margin-top: .75rem;
+    border-radius: .5rem;
+    border: 2px solid var(--screen-shadow);
+}
+
+.typeURL{
+    width: 100%;
+    margin-left: .75rem;
+}
+
+.typeURL::placeholder{
+    font-style: italic;
+    font-weight: 400;
+    color: var(--text-placeholder);
+}
+
+.addURL{
+    background: linear-gradient(var(--list-light), var(--screen));
+    margin-right: .75rem;
+}
+
+.addURL:active{
+    background: linear-gradient(var(--screen), var(--list-hover));
 }
 
 /* footer */

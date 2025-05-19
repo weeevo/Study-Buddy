@@ -88,8 +88,11 @@
     <!-- blocked websites-->
     <div id="sites" class="sites">
         <div class="screen">
-            <!-- <h1 style="margin: 0; padding-top: 25px;">Blocked Websites</h1> -->
-            <ul id="siteList"></ul>
+            <div class="URLSearch">
+                <input type="url" class="typeURL" id="typeURL" placeholder="Type URL: example.com">
+                <button class="addURL" id="addURL">Block</button>
+            </div>
+            <ul id="siteList" style="margin-top: 70px"></ul>
         </div>
         <div class="buttons">
             <button class="blue" style="grid-column: 1/4" id="add">

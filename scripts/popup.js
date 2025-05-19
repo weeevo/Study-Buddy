@@ -41,6 +41,8 @@ const addButton = document.getElementById('add');
 const addLabel = document.getElementById('addLabel');
 const activeTabURL = document.getElementById('activeTabURL');
 const siteList = document.getElementById("siteList");
+const typeURL = document.getElementById("typeURL");
+const addURL = document.getElementById("addURL");
 
 //event listeners
 timerTab.addEventListener("click", () => {
@@ -304,6 +306,14 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             renderButtonAndList(res.updatedList);
         });
     };
+    
+    addURL.onclick = () => {
+        if (typeURL.value !== "") {
+            chrome.runtime.sendMessage({ action: "blockSiteFromSearch", url: typeURL.value }, (res) => {
+                renderButtonAndList(res.updatedList);
+            });
+        }
+    }
 });
 
 function removeOverlayAllTabs() {
