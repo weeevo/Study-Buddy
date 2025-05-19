@@ -2,11 +2,10 @@
   "manifest_version": 3,
   "name": "Study Buddy",
   "version": "1.0",
-  "description": "Your most powerful focus partner. You better study, buddy!",
+  "description": "A pomodoro timer and website blocker to keep you on track during work sessions",
   "permissions": [
     "storage",
-    "tabs",
-    "notifications"
+    "tabs"
   ],
   "host_permissions": [
     "<all_urls>"
