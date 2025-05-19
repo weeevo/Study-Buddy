@@ -5,10 +5,8 @@
   "description": "A pomodoro timer and website blocker to keep you on track during work sessions",
   "permissions": [
     "storage",
-    "tabs"
-  ],
-  "host_permissions": [
-    "<all_urls>"
+    "tabs",
+    "activeTab"
   ],
   "action": {
     "default_popup": "popup.html",
