@@ -60,6 +60,10 @@ function injectBlockingOverlay(remainingTime) {
 
   const style = document.createElement("style");
   style.textContent = `
+   *{
+      transition: all .25s ease;
+    }
+      
     #site-blocker-overlay {
       position: fixed;
       top: 0; left: 0;
@@ -74,7 +78,6 @@ function injectBlockingOverlay(remainingTime) {
       z-index: 999998;
       color: #ffffff;
       font-size: 100%;
-      transition: all .5s ease;
     }
 
     h1{
@@ -290,6 +293,7 @@ function injectBlockingOverlay(remainingTime) {
   });
 }
 
+//updating UI every time theres an update
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action == "updateUI") {
     chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href }, (res) => {
@@ -481,6 +485,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break;
     case "timerPhaseChanged":
       timerSwitchAlert(request.isRunning, request.newPhase, request.workDur, request.breakDur)
+      break;
+    case "updateTheme":
+      if(request.theme == "dark") {changeToDark(overlayShadowRoot);}
+      else {changeToLight(overlayShadowRoot);}
       break;
   }
 });

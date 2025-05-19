@@ -72,23 +72,42 @@ function runTimer(resetRemainingTime = false) {
 
 // calls this every second to update the timer frontend
 function updateUI() {
-  chrome.storage.local.get(["timerData", "blockedSites"], (data) => {
+  chrome.storage.local.get(["timerData", "blockedSites"], () => {
     if (timerData.isRunning) {
       chrome.runtime.sendMessage({
         action: "updateUI",
         timerData: timerData,
         blockedSites: blockedSites
       })
+      chrome.tabs.query({}, function (tabs) {
+        tabs.forEach(tab => {
+          chrome.tabs.sendMessage(tab.id, {
+            action: "updateUI",
+            timerData: timerData,
+            blockedSites: blockedSites
+          });
+        });
+      });
     }
   });
-  chrome.tabs.query({}, function (tabs) {
-    tabs.forEach(tab => {
-      chrome.tabs.sendMessage(tab.id, { 
-        action: "updateUI",
-        timerData: timerData,
-        blockedSites: blockedSites 
+}
+
+function updateTheme() {
+  chrome.storage.local.get(["timerData"], (data) => {
+    if (timerData.isRunning) {
+      chrome.runtime.sendMessage({
+        action: "updateTheme",
+        theme: data.timerData.theme
+      })
+      chrome.tabs.query({}, function (tabs) {
+        tabs.forEach(tab => {
+          chrome.tabs.sendMessage(tab.id, {
+            action: "updateTheme",
+            theme: data.timerData.theme
+          });
+        });
       });
-    });
+    }
   });
 }
 
@@ -172,6 +191,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     timerData.breakDuration = (breakHours * 60 + breakMinutes) * 60 * 1000;
     timerData.repeats = repeats;
     timerData.isRunning = true;
+    // saveTimerState();
     updateUI();
 
     if (timerData.paused) {
@@ -181,7 +201,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   }
   //updates popup ui each time its opened
-  else if(request.action == "updatePopup"){
+  else if (request.action == "updatePopup") {
     updateUI();
   }
   // resets the timer when reset button is pressed
@@ -231,6 +251,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "saveTheme") {
     timerData.theme = request.theme;
     saveTimerState();
+    updateTheme();
   }
   else if (request.action === "getTheme") {
     sendResponse(timerData.theme);
