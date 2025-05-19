@@ -46,8 +46,14 @@ function runTimer(resetRemainingTime = false) {
         saveTimerState();
 
         chrome.runtime.sendMessage({ action: "endTimer" });
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs.length === 0) return;
+          chrome.tabs.sendMessage(tabs[0].id, { action: "timerEndAlert" });
+        });
         return;
       }
+
+      notifyActiveTab(timerData.phase, timerData.workDuration, timerData.breakDuration)
 
       chrome.runtime.sendMessage({
         action: "switchTimer",
@@ -123,6 +129,18 @@ function removeOverlayActiveTab() {
     });
 }
 
+function notifyActiveTab(phase) {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs.length === 0) return;
+    chrome.tabs.sendMessage(tabs[0].id, {
+      action: "timerPhaseChanged",
+      newPhase: phase,
+      workDur: timerData.workDuration,
+      breakDur: timerData.breakDuration
+    });
+  });
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // whenever we start or unpause the timer
   if (request.action === "startTimer") {
@@ -157,21 +175,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   else if (request.action === "skipTimer") {
     timerData.phase = timerData.phase === 'Work' ? 'Break' : 'Work';
     if (timerData.phase == "Work") { timerData.repeats--; }
-    else{
-      removeOverlayAllTabs();
-    }
     if ((timerData.repeats < 0)) {
       timerData.isRunning = false;
       timerData.remainingTime = 0;
       saveTimerState();
 
       chrome.runtime.sendMessage({ action: "endTimer" });
+      chrome.tabs.sendMessage(tabs[0].id, { action: "timerEndAlert" });
       removeOverlayAllTabs();
       sendResponse("timer finished");
       return;
     }
     else {
       setTimeout(() => {
+        notifyActiveTab(timerData.phase, timerData.workDuration, timerData.breakDuration);
         runTimer(true);
       }, 600);
     }

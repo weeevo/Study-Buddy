@@ -1,7 +1,9 @@
+let notifShadowRoot = null;
+
 (function () {
   const hostname = window.location.hostname.replace(/^www\./, "");
   ensureOverlayInjected(0);
-  chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href}, (res) => {
+  chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href }, (res) => {
     if (res.blocked) {
       ensureOverlayInjected(res.timerData.remainingTime)
       showOverlay();
@@ -14,6 +16,7 @@ function ensureOverlayInjected(remainingTime) {
   const tryInject = () => {
     if (!document.getElementById("blocker-host")) {
       injectBlockingOverlay(remainingTime);
+      injectNotif();
     }
   };
 
@@ -48,7 +51,7 @@ function injectBlockingOverlay(remainingTime) {
   host.style.left = "0";
   host.style.width = "100vw";
   host.style.height = "100vh";
-  host.style.zIndex = "2147483647";
+  host.style.zIndex = "9999999";
   host.style.display = "none";
   host.style.opacity = "0"
   host.style.transition = "opacity .5s ease";
@@ -117,6 +120,7 @@ function injectBlockingOverlay(remainingTime) {
       padding: 16px;
       box-sizing: border-box;
       border-radius: 50px;
+      transition: background-color .5s ease;
     }
 
     .button {
@@ -146,6 +150,7 @@ function injectBlockingOverlay(remainingTime) {
         display: flex;
         justify-content: flex-end;
         align-items: center;
+        transition: background-color .5s ease;
     }
 
     #colorMode{
@@ -277,7 +282,7 @@ function injectBlockingOverlay(remainingTime) {
     const timerEl = shadow.getElementById("block-timer");
     const timerh1 = shadow.getElementById("timer-header");
     let blocked = true;
-    chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href}, (res) => {
+    chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href }, (res) => {
       if (!res.blocked) {
         removeOverlay();
         blocked = false;
@@ -294,7 +299,7 @@ function injectBlockingOverlay(remainingTime) {
       if (timerData.paused) {
         timerh1.textContent = "Timer paused. "
       }
-      else if (blocked){
+      else if (blocked) {
         timerh1.textContent = "It's work time. "
         showOverlay();
       }
@@ -312,6 +317,132 @@ function injectBlockingOverlay(remainingTime) {
     childList: true,
     subtree: true,
   });
+}
+
+
+// notif when timers switch or end
+function injectNotif() {
+  if (document.getElementById("notif")) return;
+
+  const host = document.createElement("div");
+  host.id = "notif-shadow-root";
+  host.style.zIndex = "999999"
+  document.body.appendChild(host);
+
+  notifShadowRoot = host.attachShadow({ mode: "open" });
+
+  const style = document.createElement("style");
+  style.textContent = `
+          #notif{
+            display: flex;
+            align-items: center;
+            width: 550px;
+            margin-left: -275px;
+            color: white;
+            background: linear-gradient( #10cb00, #078f00);
+            box-shadow: 0 4px 0 0 #1d740b;
+            border-radius: 32px 50px 50px 32px;
+            position: fixed;
+            left: 50%; 
+            z-index: 99999999;
+            bottom: -200px;
+            transition: bottom .5s ease;
+        }
+
+        #timerLength{
+            font-family: "DM Serif Display", serif;
+            font-style: italic;
+            font-size: 48px;
+            font-weight: 700;
+            background-color: #54564f;
+            border-radius: 18px;
+            box-shadow: inset 0 0 5px 3px #3c3e38;
+            text-align: center;
+            padding: 16px;
+            padding-inline: 24px;
+            width: 200px;
+        }
+
+        #content{
+            display: flex;
+            align-items: center;
+            line-height: 1;
+            font-family: "Sofia Sans Condensed", sans-serif;
+            font-size: 32px;
+            text-align: right;
+            background: #242323;
+            box-shadow: 0 4px 0 0 #181818;
+            border-radius: 0 32px 32px 0;
+            gap: 16px;
+            padding: 12px;
+        }
+
+        #notif p{
+            margin: 0;
+            text-align: right;
+        }
+
+        .icon {
+            fill: white;
+            height: 40px;
+        }
+
+        .thumb-up{
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        #notif.show {
+          bottom: 60px;
+        }
+          
+        #close-notif{
+            display: flex;
+            align-items: center;
+            padding-inline: 16px;
+            padding-block: 20px;
+            border: 0;
+            background: none;
+        }
+
+        #close-notif:hover{
+            cursor: pointer;
+        }
+      `
+  const notif = document.createElement("div");
+  notif.id = "notif";
+  // notif.classList.add("show");
+  notif.innerHTML = `    
+        <button id="close-notif">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" ><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+        </button>
+        <div id="content">
+            <p id="popupText">The break is over. It's work time for the next</p>
+            <div id="timerLength">25:00</div>
+        </div>
+    `
+  notifShadowRoot.appendChild(style);
+  notifShadowRoot.appendChild(notif)
+
+  notifShadowRoot.getElementById("close-notif").onclick = () => {
+      notif.classList.remove("show");
+  }
+}
+
+function showNotif(message, dur) {
+  if (!notifShadowRoot) return;
+
+  const notif = notifShadowRoot.getElementById("notif");
+  if (!notif) return;
+
+  notifShadowRoot.getElementById("popupText").textContent = message;
+  notifShadowRoot.getElementById("timerLength").innerHTML = dur;
+  notif.classList.add("show");
+
+  setTimeout(() => {
+    notif.classList.remove("show");
+  }, 10000);
 }
 
 function removeOverlay() {
@@ -335,12 +466,12 @@ function showOverlay() {
       timerData?.phase === "Work";
     if (isBlocked && overlay) {
       if (overlay) {
-          overlay.style.opacity = "1";
-          setTimeout(() => {
-            overlay.style.display = "block";
-          }, 600);
-        }
+        overlay.style.opacity = "1";
+        setTimeout(() => {
+          overlay.style.display = "block";
+        }, 600);
       }
+    }
     else if (isBlocked) {
       ensureOverlayInjected(timerData.remainingTime);
     }
@@ -348,12 +479,12 @@ function showOverlay() {
 }
 
 function viewOnce() {
-  chrome.runtime.sendMessage({ action: "viewOnce"})
+  chrome.runtime.sendMessage({ action: "viewOnce" })
   removeOverlay();
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  switch (message.action) {
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  switch (request.action) {
     case "hideOverlay":
       removeOverlay(); // function to remove/hide overlay
       break;
@@ -366,9 +497,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "removeFromBlocked":
       chrome.runtime.sendMessage({ action: "toggleBlockSite", url: window.location.href });
       break;
-    // add more cases if needed
+    case "timerPhaseChanged":
+      timerSwitchAlert(request.newPhase, request.workDur, request.breakDur)
+      break;
+    case "timerEndAlert":
+      showNotif("Focus session done. Good Work!", '<svg class="icon thumb-up" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M720-120H320v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h218q32 0 56 24t24 56v80q0 7-1.5 15t-4.5 15L794-168q-9 20-30 34t-44 14ZM240-640v520H80v-520h160Z"/></svg>')
+      break;
   }
 });
+
+function timerSwitchAlert(phase, workDur, breakDur) {
+  if (phase === "Work") {
+    let time = formatTime(workDur)
+    showNotif("The break is over. It's work time for the next", time)
+  }
+  else {
+    let time = formatTime(breakDur);
+    showNotif("You've earned a break! Work starts again in", time)
+  }
+}
+
 
 // get theme when the overlay first loads
 function getTheme(shadow) {

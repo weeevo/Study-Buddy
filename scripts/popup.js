@@ -251,6 +251,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
+function timerSwitchAlert(phase, workDur, breakDur){
+    if(phase === "work"){
+        alert("The break is over. Your " + formatTime(workDur) + " has started.")
+    }
+    else{
+        alert("Good work,yYou've earned a break! Work starts again in" + formatTime(breakDur))
+    }
+}
+
 //start of site blocking functionality
 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const url = new URL(tabs[0].url);
