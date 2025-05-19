@@ -134,7 +134,6 @@ function injectBlockingOverlay(remainingTime) {
       padding: 16px;
       box-sizing: border-box;
       border-radius: 50px;
-      transition: background-color .5s ease;
     }
 
     .button {
@@ -164,7 +163,6 @@ function injectBlockingOverlay(remainingTime) {
         display: flex;
         justify-content: flex-end;
         align-items: center;
-        transition: background-color .5s ease;
     }
 
     #colorMode{

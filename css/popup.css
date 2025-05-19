@@ -16,10 +16,6 @@ body {
     scrollbar-width: thin;
 }
 
-::-moz-scrollbar-button, ::-webkit-scrollbar-button {
-    width: 0px;
-}
-
 h1{
     font-family: "DM Serif Display", serif;
     font-size: 2rem;
@@ -244,9 +240,8 @@ h2 {
 
 /* sites  */
 ul{
-    padding-bottom: .75rem;
     overflow-y: scroll;
-    height: 113px;
+    height: 125px;
 }
 
 li{
