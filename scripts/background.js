@@ -33,9 +33,11 @@ function runTimer(resetRemainingTime = false) {
   if (timerData.intervalId) clearInterval(timerData.intervalId);
 
   timerData.intervalId = setInterval(() => {
+    updateUI();
     timerData.remainingTime = timerData.remainingTime - 1000;
 
     if (timerData.remainingTime < 0) {
+      timerData.remainingTime = 0;
       clearInterval(timerData.intervalId);
       timerData.phase = timerData.phase === 'Work' ? 'Break' : 'Work';
       if (timerData.phase == "Work") { timerData.repeats--; }
@@ -46,14 +48,11 @@ function runTimer(resetRemainingTime = false) {
         saveTimerState();
 
         chrome.runtime.sendMessage({ action: "endTimer" });
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          if (tabs.length === 0) return;
-          chrome.tabs.sendMessage(tabs[0].id, { action: "timerEndAlert" });
-        });
+        notifyAllTabs();
         return;
       }
 
-      notifyActiveTab(timerData.phase, timerData.workDuration, timerData.breakDuration)
+      notifyAllTabs()
 
       chrome.runtime.sendMessage({
         action: "switchTimer",
@@ -69,6 +68,28 @@ function runTimer(resetRemainingTime = false) {
 
     saveTimerState();
   }, 1000);
+}
+
+// calls this every second to update the timer frontend
+function updateUI() {
+  chrome.storage.local.get(["timerData", "blockedSites"], (data) => {
+    if (timerData.isRunning) {
+      chrome.runtime.sendMessage({
+        action: "updateUI",
+        timerData: timerData,
+        blockedSites: blockedSites
+      })
+    }
+  });
+  chrome.tabs.query({}, function (tabs) {
+    tabs.forEach(tab => {
+      chrome.tabs.sendMessage(tab.id, { 
+        action: "updateUI",
+        timerData: timerData,
+        blockedSites: blockedSites 
+      });
+    });
+  });
 }
 
 function saveTimerState() {
@@ -114,30 +135,32 @@ function pauseTimer() {
 }
 
 function removeOverlayAllTabs() {
-    chrome.tabs.query({}, function (tabs) {
-        tabs.forEach(tab => {
-            chrome.tabs.sendMessage(tab.id, { action: "hideOverlay" });
-        });
+  chrome.tabs.query({}, function (tabs) {
+    tabs.forEach(tab => {
+      chrome.tabs.sendMessage(tab.id, { action: "hideOverlay" });
     });
+  });
 }
 
 function removeOverlayActiveTab() {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        if (tabs.length > 0) {
-            chrome.tabs.sendMessage(tabs[0].id, { action: "viewOnce" });
-        }
-    });
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    if (tabs.length > 0) {
+      chrome.tabs.sendMessage(tabs[0].id, { action: "viewOnce" });
+    }
+  });
 }
 
-function notifyActiveTab(phase) {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs.length === 0) return;
-    chrome.tabs.sendMessage(tabs[0].id, {
-      action: "timerPhaseChanged",
-      newPhase: phase,
-      workDur: timerData.workDuration,
-      breakDur: timerData.breakDuration
-    });
+function notifyAllTabs() {
+  chrome.tabs.query({}, (tabs) => {
+    tabs.forEach(tab => {
+      chrome.tabs.sendMessage(tab.id, {
+        action: "timerPhaseChanged",
+        newPhase: timerData.phase,
+        isRunning: timerData.isRunning,
+        workDur: timerData.workDuration,
+        breakDur: timerData.breakDuration
+      });
+    })
   });
 }
 
@@ -148,6 +171,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     timerData.workDuration = (workHours * 60 + workMinutes) * 60 * 1000;
     timerData.breakDuration = (breakHours * 60 + breakMinutes) * 60 * 1000;
     timerData.repeats = repeats;
+    timerData.isRunning = true;
+    updateUI();
 
     if (timerData.paused) {
       runTimer(false);
@@ -155,42 +180,44 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       startTimer();
     }
   }
-  // calls this every second to update the timer frontend
-  else if (request.action === "getTimerState") {
-    chrome.storage.local.get(["timerData", "blockedSites"], (data) => {
-      if (timerData.isRunning) {
-        sendResponse({
-          timerData: data.timerData || timerData,
-          blockedSites: data.blockedSites || []
-        });
-      }
-    });
-    return true; // Important: allows async sendResponse
+  //updates popup ui each time its opened
+  else if(request.action == "updatePopup"){
+    updateUI();
   }
   // resets the timer when reset button is pressed
   else if (request.action === "resetTimer") {
+    notifyAllTabs();
     resetTimerState();
   }
   // skips to next timer
   else if (request.action === "skipTimer") {
     timerData.phase = timerData.phase === 'Work' ? 'Break' : 'Work';
-    if (timerData.phase == "Work") { timerData.repeats--; }
+    if (timerData.phase == "Work") {
+      timerData.repeats--;
+      timerData.remainingTime = timerData.workDuration;
+    }
+    else {
+      timerData.remainingTime = timerData.breakDuration;
+      removeOverlayAllTabs();
+    }
     if ((timerData.repeats < 0)) {
       timerData.isRunning = false;
       timerData.remainingTime = 0;
       saveTimerState();
 
       chrome.runtime.sendMessage({ action: "endTimer" });
-      chrome.tabs.sendMessage(tabs[0].id, { action: "timerEndAlert" });
+      notifyAllTabs();
       removeOverlayAllTabs();
-      sendResponse("timer finished");
+      resetTimerState();
       return;
     }
     else {
+      sendResponse({ timerData: timerData });
       setTimeout(() => {
-        notifyActiveTab(timerData.phase, timerData.workDuration, timerData.breakDuration);
+        updateUI();
+        notifyAllTabs();
         runTimer(true);
-      }, 600);
+      }, 1000);
     }
   }
   // pauses
@@ -250,7 +277,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const isBlocked = result.blockedSites?.includes(hostname) &&
         result.timerData?.isRunning &&
         result.timerData?.phase === "Work" &&
-        result.viewOnceTabId !== tabId;
+        result.viewOnceTabId !== tabId &&
+        result.timerData !== 0;
       sendResponse({ blocked: isBlocked, timerData: timerData });
     });
     return true;

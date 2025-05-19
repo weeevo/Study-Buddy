@@ -1,7 +1,7 @@
 let notifShadowRoot = null;
+let overlayShadowRoot = null;
 
 (function () {
-  const hostname = window.location.hostname.replace(/^www\./, "");
   ensureOverlayInjected(0);
   chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href }, (res) => {
     if (res.blocked) {
@@ -52,11 +52,11 @@ function injectBlockingOverlay(remainingTime) {
   host.style.width = "100vw";
   host.style.height = "100vh";
   host.style.zIndex = "9999999";
-  host.style.display = "none";
+  host.style.display = "flex";
   host.style.opacity = "0"
   host.style.transition = "opacity .5s ease";
 
-  const shadow = host.attachShadow({ mode: "open" });
+  overlayShadowRoot = host.attachShadow({ mode: "open" });
 
   const style = document.createElement("style");
   style.textContent = `
@@ -238,75 +238,46 @@ function injectBlockingOverlay(remainingTime) {
     </footer>
   `;
 
-  shadow.appendChild(style);
-  shadow.appendChild(overlay);
-  getTheme(shadow);
+  overlayShadowRoot.appendChild(style);
+  overlayShadowRoot.appendChild(overlay);
+  getTheme(overlayShadowRoot);
   document.documentElement.appendChild(host);
 
   // Button actions
-  shadow.getElementById("remove-site").onclick = () => {
+  overlayShadowRoot.getElementById("remove-site").onclick = () => {
     chrome.runtime.sendMessage({ action: "toggleBlockSite", url: window.location.href });
     removeOverlay();
   };
 
-  shadow.getElementById("view-once").onclick = () => {
+  overlayShadowRoot.getElementById("view-once").onclick = () => {
     viewOnce();
   };
 
-  shadow.getElementById("start-break").onclick = () => {
+  overlayShadowRoot.getElementById("start-break").onclick = () => {
     chrome.runtime.sendMessage({ action: "skipTimer" });
     removeOverlay();
   };
 
-  shadow.getElementById("end-timers").onclick = () => {
+  overlayShadowRoot.getElementById("end-timers").onclick = () => {
     chrome.runtime.sendMessage({ action: "resetTimer" });
     removeOverlay();
   };
 
-  shadow.getElementById("colorMode").onclick = () => {
-    currentThemeSetting = shadow.querySelector("#site-blocker-overlay").getAttribute("data-theme");
+  overlayShadowRoot.getElementById("colorMode").onclick = () => {
+    currentThemeSetting = overlayShadowRoot.querySelector("#site-blocker-overlay").getAttribute("data-theme");
     let newTheme = currentThemeSetting === "dark" ? "light" : "dark";
 
-    if (newTheme == "dark") { changeToDark(shadow) }
-    else { changeToLight(shadow) }
+    if (newTheme == "dark") { changeToDark(overlayShadowRoot) }
+    else { changeToLight(overlayShadowRoot) }
 
-    shadow.querySelector("#site-blocker-overlay").setAttribute("data-theme", newTheme);
+    overlayShadowRoot.querySelector("#site-blocker-overlay").setAttribute("data-theme", newTheme);
     chrome.runtime.sendMessage({
       action: "saveTheme",
       theme: newTheme,
     });
   }
 
-  // Countdown updater
-  let interval = setInterval(() => {
-    const timerEl = shadow.getElementById("block-timer");
-    const timerh1 = shadow.getElementById("timer-header");
-    let blocked = true;
-    chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href }, (res) => {
-      if (!res.blocked) {
-        removeOverlay();
-        blocked = false;
-      }
-    });
-    chrome.runtime.sendMessage({ action: "getTimerState" }, (res) => {
-      const { timerData } = res;
-      // if(sessionStorage.getItem("viewOnceAllowed") == "true"){
-      //   return;
-      // }
-      if (timerEl) {
-        timerEl.textContent = formatTime(timerData.remainingTime);
-      }
-      if (timerData.paused) {
-        timerh1.textContent = "Timer paused. "
-      }
-      else if (blocked) {
-        timerh1.textContent = "It's work time. "
-        showOverlay();
-      }
-    });
-  }, 1000);
-
-  // Observer to prevent removal
+  // observer to prevent removal
   const observer = new MutationObserver(() => {
     if (!document.body.contains(host)) {
       document.body.appendChild(host);
@@ -319,6 +290,28 @@ function injectBlockingOverlay(remainingTime) {
   });
 }
 
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action == "updateUI") {
+    chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href }, (res) => {
+      if(!res) return;
+      if (!res.blocked) {
+        removeOverlay();
+        return;
+      }
+    });
+    const timerData = request.timerData;
+    const timerEl = overlayShadowRoot.getElementById("block-timer");
+    const timerh1 = overlayShadowRoot.getElementById("timer-header");
+    timerEl.textContent = formatTime(timerData.remainingTime);
+    if (timerData.paused) {
+      timerh1.textContent = "Timer paused. "
+    }
+    else if (timerData.phase == "Work" && timerData.isRunning) {
+      timerh1.textContent = "It's work time. "
+      showOverlay();
+    }
+  }
+})
 
 // notif when timers switch or end
 function injectNotif() {
@@ -426,7 +419,7 @@ function injectNotif() {
   notifShadowRoot.appendChild(notif)
 
   notifShadowRoot.getElementById("close-notif").onclick = () => {
-      notif.classList.remove("show");
+    notif.classList.remove("show");
   }
 }
 
@@ -449,33 +442,22 @@ function removeOverlay() {
   const overlay = document.getElementById("blocker-host");
   if (overlay) {
     overlay.style.opacity = "0";
-    setTimeout(() => {
-      overlay.style.display = "none";
-    }, 600);
+    // setTimeout(() => {
+    //   overlay.style.display = "none";
+    // }, 600);
   }
 }
 
 function showOverlay() {
+  if (!overlayShadowRoot) return;
+
   const overlay = document.getElementById("blocker-host");
-  const hostname = window.location.hostname.replace(/^www\./, "");
-  chrome.runtime.sendMessage({ action: "getTimerState" }, (res) => {
-    const { timerData, blockedSites } = res;
-    const isBlocked =
-      blockedSites.includes(hostname) &&
-      timerData?.isRunning &&
-      timerData?.phase === "Work";
-    if (isBlocked && overlay) {
-      if (overlay) {
-        overlay.style.opacity = "1";
-        setTimeout(() => {
-          overlay.style.display = "block";
-        }, 600);
-      }
-    }
-    else if (isBlocked) {
-      ensureOverlayInjected(timerData.remainingTime);
-    }
-  });
+  if (!overlay) return;
+
+  if (overlay) {
+    // overlay.style.display = "flex";
+    overlay.style.opacity = "1";
+  }
 }
 
 function viewOnce() {
@@ -498,22 +480,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       chrome.runtime.sendMessage({ action: "toggleBlockSite", url: window.location.href });
       break;
     case "timerPhaseChanged":
-      timerSwitchAlert(request.newPhase, request.workDur, request.breakDur)
-      break;
-    case "timerEndAlert":
-      showNotif("Focus session done. Good Work!", '<svg class="icon thumb-up" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M720-120H320v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h218q32 0 56 24t24 56v80q0 7-1.5 15t-4.5 15L794-168q-9 20-30 34t-44 14ZM240-640v520H80v-520h160Z"/></svg>')
+      timerSwitchAlert(request.isRunning, request.newPhase, request.workDur, request.breakDur)
       break;
   }
 });
 
-function timerSwitchAlert(phase, workDur, breakDur) {
-  if (phase === "Work") {
+function timerSwitchAlert(active, phase, workDur, breakDur) {
+  if (!active) {
+    showNotif("Focus session done. Good Work!", '<svg class="icon thumb-up" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M720-120H320v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h218q32 0 56 24t24 56v80q0 7-1.5 15t-4.5 15L794-168q-9 20-30 34t-44 14ZM240-640v520H80v-520h160Z"/></svg>')
+    removeOverlay();
+  }
+  else if (phase === "Work") {
     let time = formatTime(workDur)
     showNotif("The break is over. It's work time for the next", time)
+    showOverlay();
   }
   else {
     let time = formatTime(breakDur);
     showNotif("You've earned a break! Work starts again in", time)
+    removeOverlay();
   }
 }
 
