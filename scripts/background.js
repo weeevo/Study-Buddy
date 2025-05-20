@@ -93,17 +93,17 @@ function updateUI() {
 }
 
 function updateTheme() {
-  chrome.storage.local.get(["timerData"], (data) => {
+  chrome.storage.local.get(["timerData"], () => {
     if (timerData.isRunning) {
       chrome.runtime.sendMessage({
         action: "updateTheme",
-        theme: data.timerData.theme
+        theme: timerData.theme
       })
       chrome.tabs.query({}, function (tabs) {
         tabs.forEach(tab => {
           chrome.tabs.sendMessage(tab.id, {
             action: "updateTheme",
-            theme: data.timerData.theme
+            theme: timerData.theme
           });
         });
       });
@@ -118,7 +118,9 @@ function saveTimerState() {
     const totalSeconds = Math.floor(timerData.remainingTime / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
-    const text = `${minutes}:${String(seconds).padStart(2, "0")}`;
+    let text;
+    if(minutes == 0){ text = `${seconds}s`; }
+    else { text = `${minutes}m`}
     chrome.action.setBadgeText({ text });
     chrome.action.setBadgeBackgroundColor({ color: timerData.phase === "Work" ? "#d3191d" : "#edb110" });
   } else {
@@ -290,16 +292,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
   else if (request.action === "getBlockedStatus") {
-    console.log(sender.tab.id);
     const tabId = sender.tab.id;
     const url = new URL(request.url);
     const hostname = url.hostname.replace(/^www\./, "");
     chrome.storage.local.get(["timerData", "blockedSites", "viewOnceTabId"], (result) => {
-      const isBlocked = result.blockedSites?.includes(hostname) &&
+      const isBlocked = 
+        result.blockedSites?.includes(hostname) &&
         result.timerData?.isRunning &&
         result.timerData?.phase === "Work" &&
         result.viewOnceTabId !== tabId &&
-        result.timerData !== 0;
+        result.remainingTime !== 0;
+      // console.log("isblocked is " + isBlocked + " because:\nresult.blockedSites?.includes(hostname) is " + result.blockedSites?.includes(hostname) + " and\nresult.timerData?.isRunning is " + result.timerData?.isRunning + " and\nresult.timerData?.phase === 'Work' is " + (result.timerData?.phase === 'Work') + " and\nresult.viewOnceTabId !== tabId is " + (result.viewOnceTabId !== tabId) + " and\nresult.remainingTime !== 0 is " + (result.remainingTime !== 0) + "");
       sendResponse({ blocked: isBlocked, timerData: timerData });
     });
     return true;

@@ -3,12 +3,6 @@ let overlayShadowRoot = null;
 
 (function () {
   ensureOverlayInjected(0);
-  chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href }, (res) => {
-    if (res.blocked) {
-      ensureOverlayInjected(res.timerData.remainingTime)
-      showOverlay();
-    }
-  });
 })();
 
 // really try hard to inject my overlay 
@@ -40,10 +34,14 @@ function formatTime(ms) {
   }
 }
 
+function formatTimeMinutes(ms){
+  let totalSeconds = Math.floor(ms / 1000);
+  let minutes = (totalSeconds % 3600) / 60;
+  return minutes;
+}
+
 // injected page content
 function injectBlockingOverlay(remainingTime) {
-  if (document.getElementById("blocker-host")) showOverlay();
-
   const host = document.createElement("div");
   host.id = "blocker-host";
   host.style.position = "fixed";
@@ -128,7 +126,7 @@ function injectBlockingOverlay(remainingTime) {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
       gap: 16px;
-      width: 1000px;
+      width: 800px;
       justify-content: center;
       background-color: #2e2b2b;
       padding: 16px;
@@ -252,7 +250,7 @@ function injectBlockingOverlay(remainingTime) {
 
   overlayShadowRoot.appendChild(style);
   overlayShadowRoot.appendChild(overlay);
-  getTheme(overlayShadowRoot);
+  getTheme();
   document.documentElement.appendChild(host);
 
   // Button actions
@@ -279,13 +277,13 @@ function injectBlockingOverlay(remainingTime) {
     currentThemeSetting = overlayShadowRoot.querySelector("#site-blocker-overlay").getAttribute("data-theme");
     let newTheme = currentThemeSetting === "dark" ? "light" : "dark";
 
-    if (newTheme == "dark") { changeToDark(overlayShadowRoot) }
-    else { changeToLight(overlayShadowRoot) }
+    if (newTheme == "dark") { changeToDark() }
+    else { changeToLight() }
 
     overlayShadowRoot.querySelector("#site-blocker-overlay").setAttribute("data-theme", newTheme);
     chrome.runtime.sendMessage({
       action: "saveTheme",
-      theme: newTheme,
+      theme: newTheme
     });
   }
 
@@ -304,6 +302,10 @@ function injectBlockingOverlay(remainingTime) {
 
 //updating UI every time theres an update
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  getTheme();
+  const timerData = request.timerData;
+  const timerEl = overlayShadowRoot.getElementById("block-timer");
+  const timerh1 = overlayShadowRoot.getElementById("timer-header");
   if (request.action == "updateUI") {
     chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href }, (res) => {
       if(!res) return;
@@ -311,18 +313,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         removeOverlay();
         return;
       }
+      else{
+        timerEl.textContent = formatTime(timerData.remainingTime);
+        if (timerData.paused) {
+          timerh1.textContent = "Timer paused. "
+        }
+        else if (timerData.phase == "Work" && timerData.isRunning) {
+          timerh1.textContent = "It's work time. "
+          showOverlay();
+        }
+      }
     });
-    const timerData = request.timerData;
-    const timerEl = overlayShadowRoot.getElementById("block-timer");
-    const timerh1 = overlayShadowRoot.getElementById("timer-header");
-    timerEl.textContent = formatTime(timerData.remainingTime);
-    if (timerData.paused) {
-      timerh1.textContent = "Timer paused. "
-    }
-    else if (timerData.phase == "Work" && timerData.isRunning) {
-      timerh1.textContent = "It's work time. "
-      showOverlay();
-    }
   }
 })
 
@@ -342,8 +343,8 @@ function injectNotif() {
           #notif{
             display: flex;
             align-items: center;
-            width: 550px;
-            margin-left: -275px;
+            width: 500px;
+            margin-left: -250px;
             color: white;
             background: linear-gradient( #10cb00, #078f00);
             box-shadow: 0 4px 0 0 #1d740b;
@@ -353,20 +354,20 @@ function injectNotif() {
             z-index: 99999999;
             bottom: -200px;
             transition: bottom .5s ease;
+            fill: white;
         }
 
         #timerLength{
             font-family: "DM Serif Display", serif;
-            font-style: italic;
             font-size: 48px;
-            font-weight: 700;
+            font-weight: 200;
             background-color: #54564f;
             border-radius: 18px;
             box-shadow: inset 0 0 5px 3px #3c3e38;
             text-align: center;
             padding: 16px;
             padding-inline: 24px;
-            width: 200px;
+            width: 125px;
         }
 
         #content{
@@ -390,13 +391,14 @@ function injectNotif() {
 
         .icon {
             fill: white;
-            height: 40px;
+            width: 40px;
         }
 
         .thumb-up{
             display: flex;
             justify-content: center;
             width: 100%;
+            height: 40px;
         }
 
         #notif.show {
@@ -425,7 +427,10 @@ function injectNotif() {
         </button>
         <div id="content">
             <p id="popupText">The break is over. It's work time for the next</p>
-            <div id="timerLength">25:00</div>
+            <div id="timerLength">
+              <span id="tLength"></span>
+              <svg class="icon thumb-up" id="thumb-up" style="display: none" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M720-120H320v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h218q32 0 56 24t24 56v80q0 7-1.5 15t-4.5 15L794-168q-9 20-30 34t-44 14ZM240-640v520H80v-520h160Z"/></svg>
+            </div>
         </div>
     `
   notifShadowRoot.appendChild(style);
@@ -443,7 +448,13 @@ function showNotif(message, dur) {
   if (!notif) return;
 
   notifShadowRoot.getElementById("popupText").textContent = message;
-  notifShadowRoot.getElementById("timerLength").innerHTML = dur;
+  notifShadowRoot.getElementById("tLength").textContent = dur
+  if(dur == ""){
+    notifShadowRoot.getElementById("thumb-up").style.display = "flex"
+  }
+  else{
+    notifShadowRoot.getElementById("thumb-up").style.display = "none"
+  }
   notif.classList.add("show");
 
   setTimeout(() => {
@@ -466,7 +477,6 @@ function showOverlay() {
   if (!overlay) return;
 
   if (overlay) {
-    // overlay.style.display = "flex";
     overlay.style.display = "flex";
     overlay.style.pointerEvents = "auto"
   }
@@ -480,13 +490,13 @@ function viewOnce() {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.action) {
     case "hideOverlay":
-      removeOverlay(); // function to remove/hide overlay
+      removeOverlay();
       break;
     case "showOverlay":
-      injectBlockingOverlay(); // if you want to re-show it
+      showOverlay();
       break;
     case "viewOnce":
-      viewOnce(); // disable overlay just once for this tab
+      viewOnce();
       break;
     case "removeFromBlocked":
       chrome.runtime.sendMessage({ action: "toggleBlockSite", url: window.location.href });
@@ -495,108 +505,130 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       timerSwitchAlert(request.isRunning, request.newPhase, request.workDur, request.breakDur)
       break;
     case "updateTheme":
-      if(request.theme == "dark") {changeToDark(overlayShadowRoot);}
-      else {changeToLight(overlayShadowRoot);}
+      if(request.theme == "dark") {changeToDark();}
+      else {changeToLight();}
       break;
   }
 });
 
 function timerSwitchAlert(active, phase, workDur, breakDur) {
   if (!active) {
-    showNotif("Focus session done. Good Work!", '<svg class="icon thumb-up" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M720-120H320v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h218q32 0 56 24t24 56v80q0 7-1.5 15t-4.5 15L794-168q-9 20-30 34t-44 14ZM240-640v520H80v-520h160Z"/></svg>')
+    showNotif("Focus session complete, well done!", "")
     removeOverlay();
   }
   else if (phase === "Work") {
-    let time = formatTime(workDur)
-    showNotif("The break is over. It's work time for the next", time)
+    let time = formatTimeMinutes(workDur)
+    showNotif("The break is over. It's work time for the next", time + "m")
     showOverlay();
   }
   else {
-    let time = formatTime(breakDur);
-    showNotif("You've earned a break! Work starts again in", time)
+    let time = formatTimeMinutes(breakDur);
+    showNotif("Good work! It's break time for the next", time + "m")
     removeOverlay();
   }
 }
 
-
 // get theme when the overlay first loads
-function getTheme(shadow) {
+function getTheme() {
   chrome.runtime.sendMessage({ action: "getTheme" }, (response) => {
-    if (response == "dark") { changeToDark(shadow) }
-    else { changeToLight(shadow) }
+    if (response == "dark") { changeToDark() }
+    else { changeToLight() }
   });
 }
 
 // change colors to light mode colors and set theme to light
-function changeToLight(shadow) {
-  shadow.querySelector("#site-blocker-overlay").setAttribute("data-theme", "light");
-  shadow.getElementById("colorMode").innerHTML = 'Switch to Dark Mode <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/></svg>';
+function changeToLight() {
+  overlayShadowRoot.querySelector("#site-blocker-overlay").setAttribute("data-theme", "light");
+  overlayShadowRoot.getElementById("colorMode").innerHTML = 'Switch to Dark Mode <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/></svg>';
   // changing colors
   // page and section background color
-  shadow.querySelector("#site-blocker-overlay").style.backgroundColor = "rgba(230, 230, 230, .99)"
-  shadow.querySelector(".buttons").style.backgroundColor = "#f4f5f6"
-  shadow.querySelector("footer").style.backgroundColor = "#f4f5f6"
+  overlayShadowRoot.querySelector("#site-blocker-overlay").style.backgroundColor = "rgba(230, 230, 230, .99)"
+  overlayShadowRoot.querySelector(".buttons").style.backgroundColor = "#f4f5f6"
+  overlayShadowRoot.querySelector("footer").style.backgroundColor = "#f4f5f6"
 
   // text color
-  shadow.querySelector(".title").style.color = "#000000"
-  shadow.querySelector("#colorMode").style.color = "#000000"
-  shadow.querySelector(".icon").style.fill = "#000000"
+  overlayShadowRoot.querySelector(".title").style.color = "#000000"
+  overlayShadowRoot.querySelector("#colorMode").style.color = "#000000"
+  overlayShadowRoot.querySelector(".icon").style.fill = "#000000"
 
   // button colors
-  shadow.querySelector(".yellow").style.background = "linear-gradient( #F8C63F, #E4A238)";
-  shadow.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #CD9131";
-  shadow.querySelector(".yellow").addEventListener("mousedown", () => { shadow.querySelector(".yellow").style.boxShadow = "inset 0 6.4px #D8AB34" });
-  shadow.querySelector(".yellow").addEventListener("mouseup", () => { shadow.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #CD9131" });
+  overlayShadowRoot.querySelector(".yellow").style.background = "linear-gradient( #F8C63F, #E4A238)";
+  overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #CD9131";
+  overlayShadowRoot.querySelector(".yellow").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 6.4px #D8AB34" });
+  overlayShadowRoot.querySelector(".yellow").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #CD9131" });
 
-  shadow.querySelector(".blue").style.background = "linear-gradient( #3F64F8, #383BE4)";
-  shadow.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #3134CD";
-  shadow.querySelector(".blue").addEventListener("mousedown", () => { shadow.querySelector(".blue").style.boxShadow = "inset 0 6.4px #3455D8" });
-  shadow.querySelector(".blue").addEventListener("mouseup", () => { shadow.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #3134CD" });
+  overlayShadowRoot.querySelector(".blue").style.background = "linear-gradient( #3F64F8, #383BE4)";
+  overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #3134CD";
+  overlayShadowRoot.querySelector(".blue").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 6.4px #3455D8" });
+  overlayShadowRoot.querySelector(".blue").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #3134CD" });
 
-  shadow.querySelector(".green").style.background = "linear-gradient( #55D34A, #34A92E)";
-  shadow.querySelector(".green").style.boxShadow = "inset 0 -6.4px #32941E";
-  shadow.querySelector(".green").addEventListener("mousedown", () => { shadow.querySelector(".green").style.boxShadow = "inset 0 6.4px #3FC038" });
-  shadow.querySelector(".green").addEventListener("mouseup", () => { shadow.querySelector(".green").style.boxShadow = "inset 0 -6.4px  #32941E" });
+  overlayShadowRoot.querySelector(".green").style.background = "linear-gradient( #55D34A, #34A92E)";
+  overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 -6.4px #32941E";
+  overlayShadowRoot.querySelector(".green").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 6.4px #3FC038" });
+  overlayShadowRoot.querySelector(".green").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 -6.4px  #32941E" });
 
-  shadow.querySelector(".red").style.background = "linear-gradient( #E24F52, #C52F2F)";
-  shadow.querySelector(".red").style.boxShadow = "inset 0 -6.4px #BA2222";
-  shadow.querySelector(".red").addEventListener("mousedown", () => { shadow.querySelector(".red").style.boxShadow = "inset 0 6.4px #D9393C" });
-  shadow.querySelector(".red").addEventListener("mouseup", () => { shadow.querySelector(".red").style.boxShadow = "inset 0 -6.4px #BA2222" });
+  overlayShadowRoot.querySelector(".red").style.background = "linear-gradient( #E24F52, #C52F2F)";
+  overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 -6.4px #BA2222";
+  overlayShadowRoot.querySelector(".red").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 6.4px #D9393C" });
+  overlayShadowRoot.querySelector(".red").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 -6.4px #BA2222" });
+
+  // notification
+  notifShadowRoot.querySelector("#content").style.backgroundColor = "rgba(230, 230, 230, .99)";
+  notifShadowRoot.querySelector("#content").style.boxShadow = "0 4px 0 0 #cbcbcb";
+  notifShadowRoot.querySelector("#notif").style.color = "#000000";
+
+  notifShadowRoot.querySelector("#notif").style.background = "linear-gradient( #55D34A, #34A92E)"
+  notifShadowRoot.querySelector("#notif").style.boxShadow = "0 4px 0 0  #32941E";
+
+  notifShadowRoot.querySelector("#timerLength").style.backgroundColor = "#e1e6dd";
+  notifShadowRoot.querySelector(".thumb-up").style.fill= "#000000";
+  notifShadowRoot.querySelector("#timerLength").style.boxShadow = "inset 0 0 5px 3px  #d4d8ce";
 }
 
 // change colors to dark mode colors and set theme to dark
-function changeToDark(shadow) {
-  shadow.querySelector("#site-blocker-overlay").setAttribute("data-theme", "dark");
-  shadow.getElementById("colorMode").innerHTML = 'Switch to Light Mode <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z"/></svg>';
+function changeToDark() {
+  overlayShadowRoot.querySelector("#site-blocker-overlay").setAttribute("data-theme", "dark");
+  overlayShadowRoot.getElementById("colorMode").innerHTML = 'Switch to Light Mode <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z"/></svg>';
   // changing colors
   // page and section background colors
-  shadow.querySelector("#site-blocker-overlay").style.backgroundColor = "rgba(36, 35, 35, .99)"
-  shadow.querySelector(".buttons").style.backgroundColor = "#2e2b2b"
-  shadow.querySelector("footer").style.backgroundColor = "#2e2b2b";
+  overlayShadowRoot.querySelector("#site-blocker-overlay").style.backgroundColor = "rgba(36, 35, 35, .99)"
+  overlayShadowRoot.querySelector(".buttons").style.backgroundColor = "#2e2b2b"
+  overlayShadowRoot.querySelector("footer").style.backgroundColor = "#2e2b2b";
 
   //text colors
-  shadow.querySelector(".title").style.color = "#ffffff"
-  shadow.querySelector("#colorMode").style.color = "#ffffff"
-  shadow.querySelector(".icon").style.fill = "#ffffff"
+  overlayShadowRoot.querySelector(".title").style.color = "#ffffff"
+  overlayShadowRoot.querySelector("#colorMode").style.color = "#ffffff"
 
   // button colors
-  shadow.querySelector(".yellow").style.background = "linear-gradient( #edb110, #c78010)";
-  shadow.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #9b6a1b";
-  shadow.querySelector(".yellow").addEventListener("mousedown", () => { shadow.querySelector(".yellow").style.boxShadow = "inset 0 6.4px #c59000" });
-  shadow.querySelector(".yellow").addEventListener("mouseup", () => { shadow.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #9b6a1b" });
+  overlayShadowRoot.querySelector(".yellow").style.background = "linear-gradient( #edb110, #c78010)";
+  overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #9b6a1b";
+  overlayShadowRoot.querySelector(".yellow").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 6.4px #c59000" });
+  overlayShadowRoot.querySelector(".yellow").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #9b6a1b" });
 
-  shadow.querySelector(".blue").style.background = "linear-gradient( #2245d3, #1417bb)";
-  shadow.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #0407a7";
-  shadow.querySelector(".blue").addEventListener("mousedown", () => { shadow.querySelector(".blue").style.boxShadow = "inset 0 6.4px #0e2fb1" });
-  shadow.querySelector(".blue").addEventListener("mouseup", () => { shadow.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #0407a7" });
+  overlayShadowRoot.querySelector(".blue").style.background = "linear-gradient( #2245d3, #1417bb)";
+  overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #0407a7";
+  overlayShadowRoot.querySelector(".blue").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 6.4px #0e2fb1" });
+  overlayShadowRoot.querySelector(".blue").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #0407a7" });
 
-  shadow.querySelector(".green").style.background = "linear-gradient( #10cb00, #078f00)";
-  shadow.querySelector(".green").style.boxShadow = "inset 0 -6.4px #1d740b";
-  shadow.querySelector(".green").addEventListener("mousedown", () => { shadow.querySelector(".green").style.boxShadow = "inset 0 6.4px #0ea506" });
-  shadow.querySelector(".green").addEventListener("mouseup", () => { shadow.querySelector(".green").style.boxShadow = "inset 0 -6.4px  #1d740b" });
+  overlayShadowRoot.querySelector(".green").style.background = "linear-gradient( #10cb00, #078f00)";
+  overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 -6.4px #1d740b";
+  overlayShadowRoot.querySelector(".green").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 6.4px #0ea506" });
+  overlayShadowRoot.querySelector(".green").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 -6.4px  #1d740b" });
 
-  shadow.querySelector(".red").style.background = "linear-gradient( #d3191d, #ab1b1b)";
-  shadow.querySelector(".red").style.boxShadow = "inset 0 -6.4px #890606";
-  shadow.querySelector(".red").addEventListener("mousedown", () => { shadow.querySelector(".red").style.boxShadow = "inset 0 6.4px #ab0a0d" });
-  shadow.querySelector(".red").addEventListener("mouseup", () => { shadow.querySelector(".red").style.boxShadow = "inset 0 -6.4px #890606" });
+  overlayShadowRoot.querySelector(".red").style.background = "linear-gradient( #d3191d, #ab1b1b)";
+  overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 -6.4px #890606";
+  overlayShadowRoot.querySelector(".red").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 6.4px #ab0a0d" });
+  overlayShadowRoot.querySelector(".red").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 -6.4px #890606" });
+
+  // notification
+  notifShadowRoot.querySelector("#content").style.backgroundColor = "rgba(36, 35, 35, .99)";
+  notifShadowRoot.querySelector("#content").style.boxShadow = "0 4px 0 0 #181818";
+  notifShadowRoot.querySelector("#notif").style.color = "#ffffff";
+  
+  notifShadowRoot.querySelector("#notif").style.background = "llinear-gradient( #10cb00, #078f00)"
+  notifShadowRoot.querySelector("#notif").style.boxShadow = "0 4px 0 0 #1d740b";
+  
+  notifShadowRoot.querySelector("#timerLength").style.backgroundColor = "#54564f";
+  notifShadowRoot.querySelector(".thumb-up").style.fill= "#ffffff";
+  notifShadowRoot.querySelector("#timerLength").style.boxShadow = "inset 0 0 5px 3px  #3c3e38";
 }
