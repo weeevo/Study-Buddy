@@ -297,7 +297,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const hostname = url.hostname.replace(/^www\./, "");
     chrome.storage.local.get(["timerData", "blockedSites", "viewOnceTabId"], (result) => {
       const isBlocked = 
-        result.blockedSites?.includes(hostname) &&
+        !result.blockedSites?.includes(hostname) &&
         result.timerData?.isRunning &&
         result.timerData?.phase === "Work" &&
         result.viewOnceTabId !== tabId &&
