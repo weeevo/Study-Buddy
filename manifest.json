@@ -27,8 +27,8 @@
   },
   "web_accessible_resources": [
     {
-    "resources": ["fonts/*.ttf", "fonts/*.woff2"],
-    "matches": ["<all_urls>"]
+    "resources": ["fonts/*.woff2"],
+    "matches": ["http://*/*", "https://*/*"]
     }
   ],
   "content_scripts": [

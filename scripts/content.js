@@ -6,7 +6,8 @@ let overlayShadowRoot = null;
 })();
 
 // really try hard to inject my overlay 
-function ensureOverlayInjected(remainingTime) {
+async function ensureOverlayInjected(remainingTime) {
+  await preloadFonts();
   const tryInject = () => {
     if (!document.getElementById("blocker-host")) {
       injectBlockingOverlay(remainingTime);
@@ -58,32 +59,54 @@ function injectBlockingOverlay(remainingTime) {
 
   overlayShadowRoot = host.attachShadow({ mode: "open" });
 
-  // const fontLink = document.createElement("link");
-  // const preconnect1 = document.createElement("link");
-  // const preconnect2 = document.createElement("link")
-
-  // preconnect2.rel = "preconnect";
-  // preconnect2.href = "https://fonts.gstatic.com"
-  // preconnect2.crossOrigin = "anonymous"
-  // preconnect1.rel = "preconnect";
-  // preconnect1.href = "https://fonts.googleapis.com";
-  // fontLink.rel = "stylesheet";
-  // fontLink.href = "https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sofia+Sans+Condensed:ital,wght@0,1..1000;1,1..1000&display=swap";
-
-  // document.head.appendChild(preconnect1);
-  // document.head.appendChild(preconnect2);
-  // document.head.appendChild(fontLink);
-
-  // @font-face {
-  //   font-display: swap;
-  //   font-family: 'Sofia Sans Condensed';
-  //   font-style: normal;
-  //   font-weight: 300;
-  //   src: url('${chrome.runtime.getURL('fonts/SofiaSans-Light.ttf')}' format('ttf');
-  // }
+  const SSC300 = chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-300.woff2');
+  const SSC400 = chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-regular.woff2');
+  const SSC200 = chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-200italic.woff2');
+  const DMSregular = chrome.runtime.getURL('fonts/dm-serif-display-v15-latin-regular.woff2');
+  const DMSitalic = chrome.runtime.getURL('fonts/dm-serif-display-v15-latin-italic.woff2');
 
   const style = document.createElement("style");
   style.textContent = `
+    @font-face {
+      font-display: swap;
+      font-family: 'Sofia Sans Condensed';
+      font-style: normal;
+      font-weight: 300;
+      src: url('${SSC300}') format('woff2');
+    }
+    
+    @font-face {
+      font-display: swap;
+      font-family: 'Sofia Sans Condensed';
+      font-style: normal;
+      font-weight: 400;
+      src: url('${SSC400}') format('woff2');
+    }
+
+    @font-face {
+      font-display: swap;
+      font-family: 'Sofia Sans Condensed';
+      font-style: italic;
+      font-weight: 200;
+      src: url('${SSC200}') format('woff2');
+    }
+
+    @font-face {
+      font-display: swap;
+      font-family: 'DM Serif Display';
+      font-style: normal;
+      font-weight: 700;
+      src: url('${DMSregular}') format('woff2');
+    }
+
+    @font-face {
+      font-display: swap;
+      font-family: 'DM Serif Display';
+      font-style: italic;
+      font-weight: 700;
+      src: url('${DMSitalic}') format('woff2');
+    }
+
     #site-blocker-overlay {
       position: fixed;
       top: 0; left: 0;
@@ -103,16 +126,18 @@ function injectBlockingOverlay(remainingTime) {
     h1{
       font-family: "DM Serif Display", serif;
       font-size: 80px !important;
+      font-weight: 700;
+      font-style: normal;
       line-height: .8;
       margin-bottom: 20px;
       margin-top: 0;
-      font-weight: 700;
     }
 
     p{
-      font-family: "Sofia Sans Condensed", sans-serif;
-      margin: 0;
+      font-family: 'Sofia Sans Condensed', script;
       font-weight: 300;
+      font-style: normal;
+      margin: 0;
       font-size: 40px !important;
       line-height: 1.1;
       max-width: 600px;
@@ -147,6 +172,7 @@ function injectBlockingOverlay(remainingTime) {
 
     .button {
       font-family: "Sofia Sans Condensed", sans-serif;
+      font-weight: 400;
       border: 0;
       font-size: 32px !important;
       padding: 16px;
@@ -176,15 +202,15 @@ function injectBlockingOverlay(remainingTime) {
 
     #colorMode{
       font-family: "Sofia Sans Condensed", sans-serif;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        padding: 2px;
-        font-size: 24px;
-        font-weight: 200;
-        font-style: italic;
-        text-decoration: none;
-        cursor: pointer;
+      font-size: 24px;
+      font-weight: 200;
+      font-style: italic;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 2px;
+      text-decoration: none;
+      cursor: pointer;
     }
 
     .icon{
@@ -354,8 +380,54 @@ function injectNotif() {
 
   notifShadowRoot = host.attachShadow({ mode: "open" });
 
+  const SSC300 = chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-300.woff2');
+  const SSC400 = chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-regular.woff2');
+  const SSC200 = chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-200italic.woff2');
+  const DMSregular = chrome.runtime.getURL('fonts/dm-serif-display-v15-latin-regular.woff2');
+  const DMSitalic = chrome.runtime.getURL('fonts/dm-serif-display-v15-latin-italic.woff2');
+
   const style = document.createElement("style");
   style.textContent = `
+    @font-face {
+      font-display: swap;
+      font-family: 'Sofia Sans Condensed';
+      font-style: normal;
+      font-weight: 300;
+      src: url('${SSC300}') format('woff2');
+    }
+    
+    @font-face {
+      font-display: swap;
+      font-family: 'Sofia Sans Condensed';
+      font-style: normal;
+      font-weight: 400;
+      src: url('${SSC400}') format('woff2');
+    }
+
+    @font-face {
+      font-display: swap;
+      font-family: 'Sofia Sans Condensed';
+      font-style: italic;
+      font-weight: 200;
+      src: url('${SSC200}') format('woff2');
+    }
+
+    @font-face {
+      font-display: swap;
+      font-family: 'DM Serif Display';
+      font-style: normal;
+      font-weight: 700;
+      src: url('${DMSregular}') format('woff2');
+    }
+
+    @font-face {
+      font-display: swap;
+      font-family: 'DM Serif Display';
+      font-style: italic;
+      font-weight: 700;
+      src: url('${DMSitalic}') format('woff2');
+    }
+      
     #notif{
       display: flex;
       align-items: center;
@@ -541,6 +613,49 @@ function timerSwitchAlert(active, phase, workDur, breakDur) {
     showNotif("Good work! It's break time for the next", time + "m")
     removeOverlay();
   }
+}
+
+async function preloadFonts(){
+  // sofia sans normal 300
+  const font1 = new FontFace(
+    'Sofia Sans Condensed',
+    `url(${chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-300.woff2')})`,
+    { weight: '300', style: 'normal'}
+  );
+
+  const font5 = new FontFace(
+    'Sofia Sans Condensed',
+    `url(${chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-regular.woff2')})`,
+    { weight: '400', style: 'normal'}
+  );
+
+  // sofia sans italic 200
+  const font2 = new FontFace(
+    'Sofia Sans Condensed',
+    `url(${chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-200italic.woff2')})`,
+    { weight: '200', style: 'italic'}
+  );
+
+  // dm serif display normal 400
+  const font3 = new FontFace(
+    'DM Serif Display',
+    `url(${chrome.runtime.getURL('fonts/dm-serif-display-v15-latin-regular.woff2')})`,
+    { weight: '700', style: 'normal'}
+  );
+
+  // dm serif display italic 400
+  const font4 = new FontFace(
+    'DM Serif Display',
+    `url(${chrome.runtime.getURL('fonts/dm-serif-display-v15-latin-italic.woff2')})`,
+    { weight: '700', style: 'italic'}
+  );
+
+  await Promise.all([font1.load(), font2.load(), font3.load(), font4.load(), font5.load()]);
+  document.fonts.add(font1);
+  document.fonts.add(font2);
+  document.fonts.add(font3);
+  document.fonts.add(font4);
+  document.fonts.add(font5);
 }
 
 // get theme when the overlay first loads
