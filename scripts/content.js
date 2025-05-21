@@ -47,6 +47,9 @@ function injectBlockingOverlay(remainingTime) {
   host.style.position = "fixed";
   host.style.top = "0";
   host.style.left = "0";
+  host.style.padding = "0";
+  host.style.margin = "0";
+  host.style.border = "0";
   host.style.width = "100vw";
   host.style.height = "100vh";
   host.style.zIndex = "9999999";
@@ -71,49 +74,13 @@ function injectBlockingOverlay(remainingTime) {
   // document.head.appendChild(preconnect2);
   // document.head.appendChild(fontLink);
 
-  const fonts = document.createElement("style");
-  fonts.textContent = `
-    /* sofia-sans-condensed-200 - latin */
-    @font-face {
-      font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
-      font-family: 'Sofia Sans Condensed';
-      font-style: normal;
-      font-weight: 200;
-      src: url('../fonts/sofia-sans-condensed-v2-latin-200.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-    }
-    /* sofia-sans-condensed-200italic - latin */
-    @font-face {
-      font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
-      font-family: 'Sofia Sans Condensed';
-      font-style: italic;
-      font-weight: 200;
-      src: url('../fonts/sofia-sans-condensed-v2-latin-200italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-    }
-    /* sofia-sans-condensed-300 - latin */
-    @font-face {
-      font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
-      font-family: 'Sofia Sans Condensed';
-      font-style: normal;
-      font-weight: 300;
-      src: url('../fonts/sofia-sans-condensed-v2-latin-300.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-    }
-    /* dm-serif-display-regular - latin */
-    @font-face {
-      font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
-      font-family: 'DM Serif Display';
-      font-style: normal;
-      font-weight: 400;
-      src: url('../fonts/dm-serif-display-v15-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-    }
-    /* dm-serif-display-italic - latin */
-    @font-face {
-      font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
-      font-family: 'DM Serif Display';
-      font-style: italic;
-      font-weight: 400;
-      src: url('../fonts/dm-serif-display-v15-latin-italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-    }`
-
+  // @font-face {
+  //   font-display: swap;
+  //   font-family: 'Sofia Sans Condensed';
+  //   font-style: normal;
+  //   font-weight: 300;
+  //   src: url('${chrome.runtime.getURL('fonts/SofiaSans-Light.ttf')}' format('ttf');
+  // }
 
   const style = document.createElement("style");
   style.textContent = `
@@ -143,12 +110,12 @@ function injectBlockingOverlay(remainingTime) {
     }
 
     p{
-        font-family: "Sofia Sans Condensed", sans-serif;
-        margin: 0;
-        font-weight: 300;
-        font-size: 40px !important;
-        line-height: 1.1;
-        max-width: 600px;
+      font-family: "Sofia Sans Condensed", sans-serif;
+      margin: 0;
+      font-weight: 300;
+      font-size: 40px !important;
+      line-height: 1.1;
+      max-width: 600px;
     }
 
     em{
@@ -292,7 +259,6 @@ function injectBlockingOverlay(remainingTime) {
     </footer>
   `;
 
-  overlayShadowRoot.appendChild(fonts);
   overlayShadowRoot.appendChild(style);
   overlayShadowRoot.appendChild(overlay);
   getTheme();
@@ -378,152 +344,110 @@ function injectNotif() {
 
   const host = document.createElement("div");
   host.id = "notif-shadow-root";
+  host.style.position = "fixed";
+  host.style.padding = "0";
+  host.style.margin = "0";
+  host.style.border = "0";
+  
   host.style.zIndex = "999999"
   document.body.appendChild(host);
 
   notifShadowRoot = host.attachShadow({ mode: "open" });
 
-  const fonts = document.createElement("style");
-  fonts.textContent = `
-    /* sofia-sans-condensed-200 - latin */
-    @font-face {
-      font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
-      font-family: 'Sofia Sans Condensed';
-      font-style: normal;
-      font-weight: 200;
-      src: url('../fonts/sofia-sans-condensed-v2-latin-200.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-    }
-    /* sofia-sans-condensed-200italic - latin */
-    @font-face {
-      font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
-      font-family: 'Sofia Sans Condensed';
-      font-style: italic;
-      font-weight: 200;
-      src: url('../fonts/sofia-sans-condensed-v2-latin-200italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-    }
-    /* sofia-sans-condensed-300 - latin */
-    @font-face {
-      font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
-      font-family: 'Sofia Sans Condensed';
-      font-style: normal;
-      font-weight: 300;
-      src: url('../fonts/sofia-sans-condensed-v2-latin-300.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-    }
-    /* dm-serif-display-regular - latin */
-    @font-face {
-      font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
-      font-family: 'DM Serif Display';
-      font-style: normal;
-      font-weight: 400;
-      src: url('../fonts/dm-serif-display-v15-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-    }
-    /* dm-serif-display-italic - latin */
-    @font-face {
-      font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
-      font-family: 'DM Serif Display';
-      font-style: italic;
-      font-weight: 400;
-      src: url('../fonts/dm-serif-display-v15-latin-italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
-    }`
-
-
   const style = document.createElement("style");
   style.textContent = `
-          #notif{
-            display: flex;
-            align-items: center;
-            width: 550px;
-            margin-left: -275px;
-            color: white;
-            background: linear-gradient( #10cb00, #078f00);
-            box-shadow: 0 4px 0 0 #1d740b;
-            border-radius: 32px 50px 50px 32px;
-            position: fixed;
-            left: 50%; 
-            z-index: 99999999;
-            bottom: -200px;
-            transition: bottom .5s ease;
-            fill: white;
-        }
+    #notif{
+      display: flex;
+      align-items: center;
+      width: 550px;
+      margin-left: -275px;
+      color: white;
+      background: linear-gradient( #10cb00, #078f00);
+      box-shadow: 0 4px 0 0 #1d740b;
+      border-radius: 32px 50px 50px 32px;
+      position: fixed;
+      left: 50%; 
+      z-index: 99999999;
+      bottom: -200px;
+      transition: bottom .5s ease;
+      fill: white;
+    }
 
-        #timerLength{
-            font-family: "DM Serif Display", serif;
-            font-size: 48px;
-            font-weight: 200;
-            background-color: #54564f;
-            border-radius: 18px;
-            box-shadow: inset 0 0 5px 3px #3c3e38;
-            text-align: center;
-            padding: 16px;
-            padding-inline: 24px;
-            width: 200px;
-        }
+    #timerLength{
+      font-family: "DM Serif Display", serif;
+      font-size: 48px;
+      font-weight: 200;
+      background-color: #54564f;
+      border-radius: 18px;
+      box-shadow: inset 0 0 5px 3px #3c3e38;
+      text-align: center;
+      padding: 16px;
+      padding-inline: 24px;
+      width: 200px;
+    }
 
-        #content{
-            display: flex;
-            align-items: center;
-            line-height: 1;
-            font-family: "Sofia Sans Condensed", sans-serif;
-            font-size: 32px;
-            text-align: right;
-            background: #242323;
-            box-shadow: 0 4px 0 0 #181818;
-            border-radius: 0 32px 32px 0;
-            gap: 24px;
-            padding: 12px;
-        }
+    #content{
+      display: flex;
+      align-items: center;
+      line-height: 1;
+      font-family: "Sofia Sans Condensed", sans-serif;
+      font-size: 32px;
+      text-align: right;
+      background: #242323;
+      box-shadow: 0 4px 0 0 #181818;
+      border-radius: 0 32px 32px 0;
+      gap: 24px;
+      padding: 12px;
+    }
 
-        #notif p{
-            margin: 0;
-            text-align: right;
-        }
+    #notif p{
+      margin: 0;
+      text-align: right;
+    }
 
-        .icon {
-            fill: white;
-            width: 40px;
-        }
+    .icon {
+      fill: white;
+      width: 40px;
+    }
 
-        .thumb-up{
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            height: 40px;
-        }
+    .thumb-up{
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      height: 40px;
+    }
 
-        #notif.show {
-          bottom: 60px;
-        }
+    #notif.show {
+      bottom: 60px;
+    }
           
-        #close-notif{
-            display: flex;
-            align-items: center;
-            padding-inline: 16px;
-            padding-block: 20px;
-            border: 0;
-            background: none;
-        }
+    #close-notif{
+      display: flex;
+      align-items: center;
+      padding-inline: 16px;
+      padding-block: 20px;
+      border: 0;
+      background: none;
+    }
 
-        #close-notif:hover{
-            cursor: pointer;
-        }
-      `
+    #close-notif:hover{
+      cursor: pointer;
+    }`
+
   const notif = document.createElement("div");
   notif.id = "notif";
-  // notif.classList.add("show");
   notif.innerHTML = `    
-        <button id="close-notif">
-            <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" ><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
-        </button>
-        <div id="content">
-            <p id="popupText">The break is over. It's work time for the next</p>
-            <div id="timerLength">
-              <span id="tLength"></span>
-              <svg class="icon thumb-up" id="thumb-up" style="display: none" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M720-120H320v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h218q32 0 56 24t24 56v80q0 7-1.5 15t-4.5 15L794-168q-9 20-30 34t-44 14ZM240-640v520H80v-520h160Z"/></svg>
-            </div>
-        </div>
-    `
+    <button id="close-notif">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" ><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+    </button>
+    <div id="content">
+      <p id="popupText">The break is over. It's work time for the next</p>
+      <div id="timerLength">
+        <span id="tLength"></span>
+        <svg class="icon thumb-up" id="thumb-up" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M720-120H320v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h218q32 0 56 24t24 56v80q0 7-1.5 15t-4.5 15L794-168q-9 20-30 34t-44 14ZM240-640v520H80v-520h160Z"/></svg>
+      </div>
+    </div>`
 
-  notifShadowRoot.appendChild(fonts);
   notifShadowRoot.appendChild(style);
   notifShadowRoot.appendChild(notif)
 
