@@ -119,8 +119,8 @@ function saveTimerState() {
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     let text;
-    if(minutes == 0){ text = `${seconds}s`; }
-    else { text = `${minutes}m`}
+    if (minutes == 0) { text = `${seconds}s`; }
+    else { text = `${minutes}m` }
     chrome.action.setBadgeText({ text });
     chrome.action.setBadgeBackgroundColor({ color: timerData.phase === "Work" ? "#d3191d" : "#edb110" });
   } else {
@@ -296,13 +296,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const url = new URL(request.url);
     const hostname = url.hostname.replace(/^www\./, "");
     chrome.storage.local.get(["timerData", "blockedSites", "viewOnceTabId"], (result) => {
-      const isBlocked = 
+      const isBlocked =
         !result.blockedSites?.includes(hostname) &&
         result.timerData?.isRunning &&
         result.timerData?.phase === "Work" &&
         result.viewOnceTabId !== tabId &&
         result.remainingTime !== 0;
       // console.log("isblocked is " + isBlocked + " because:\nresult.blockedSites?.includes(hostname) is " + result.blockedSites?.includes(hostname) + " and\nresult.timerData?.isRunning is " + result.timerData?.isRunning + " and\nresult.timerData?.phase === 'Work' is " + (result.timerData?.phase === 'Work') + " and\nresult.viewOnceTabId !== tabId is " + (result.viewOnceTabId !== tabId) + " and\nresult.remainingTime !== 0 is " + (result.remainingTime !== 0) + "");
+
+      if (isBlocked) {
+        chrome.tabs.update(tabId, { muted: true });
+      } else {
+        chrome.tabs.update(tabId, { muted: false });
+      }
+
       sendResponse({ blocked: isBlocked, timerData: timerData });
     });
     return true;
@@ -344,3 +351,7 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
     }
   });
 });
+
+function muteTab(tabId) {
+  chrome.tabs.update(tabId, { muted: true });
+}

@@ -101,9 +101,9 @@ stopButton.addEventListener("click", pauseTimer);
 
 function initializeTimer() {
     workHourValue = parseFloat(workHourInput.value) || 0;
-    workMinuteValue = parseFloat(workMinuteInput.value) || 0;
+    workMinuteValue = parseFloat(workMinuteInput.value) || 25;
     breakHourValue = parseFloat(breakHourInput.value) || 0;
-    breakMinuteValue = parseFloat(breakMinuteInput.value) || 0;
+    breakMinuteValue = parseFloat(breakMinuteInput.value) || 10;
 
     let repeatAmountValue = 0; // Default
     for (let i = 0; i < radios.length; i++) {
