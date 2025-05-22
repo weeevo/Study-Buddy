@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Study Buddy",
   "version": "1.0",
-  "description": "A pomodoro timer and website blocker to keep you on track during work sessions",
+  "description": "Pomodoro timer and website blocker for better focus sessions",
   "permissions": [
     "storage",
     "tabs"
