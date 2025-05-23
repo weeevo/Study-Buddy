@@ -2,7 +2,7 @@
 **You better study, buddy!**  
 This chrome extension is your most powerful tool for when you need to focus hard. Set fully customizable work and break timers, and control website blocking during work sessions.  
 
-There is a light and dark mode available, with (hopefully) more color customization coming in the future!    
+There is a light and dark mode available, and button colors are fully customizable through the options page!    
 
 ## How to use
 ### Timer 
