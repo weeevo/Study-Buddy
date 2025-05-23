@@ -103,7 +103,6 @@ function updateUI() {
 
 function updateTheme() {
   chrome.storage.local.get(["timerData"], () => {
-    if (timerData.isRunning) {
       chrome.runtime.sendMessage({
         action: "updateTheme",
         theme: timerData.theme
@@ -116,8 +115,7 @@ function updateTheme() {
           });
         });
       });
-    }
-  });
+    });
 }
 
 function saveTimerState() {

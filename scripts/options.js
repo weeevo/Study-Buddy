@@ -1,7 +1,12 @@
+import { applyCustomColors } from "./shared.js";
+
 // document elements
 const automute = document.getElementById("automute");
 const whitelist = document.getElementById("whitelist");
 const timerOrderOptions = document.getElementsByName("timer-order");
+
+const timerOrderopt1 = document.getElementById("work-break");
+const timerOrderopt2 = document.getElementById("break-work");
 
 const color1 = document.getElementById("color1");
 const color2 = document.getElementById("color2");
@@ -19,6 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
         timerOrderOptions[0].checked = response.order;
     })
 
+    if(timerOrderOptions[0].checked){
+        timerOrderOptions[1].checked = true;
+    }
+
     chrome.storage.local.get(["colors"], (result) => {
         const storedColors = result.colors || {};
         color1.value = storedColors.color1 ?? "#edb110";
@@ -34,6 +43,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 automute.addEventListener("change", saveOptions)
 whitelist.addEventListener("change", saveOptions)
+whitelist.addEventListener("change", saveOptions)
+
+timerOrderopt1.addEventListener("change", saveOptions)
+timerOrderopt2.addEventListener("change", saveOptions)
+
 color1.addEventListener("change", saveColors)
 color2.addEventListener("change", saveColors)
 color3.addEventListener("change", saveColors)
@@ -93,62 +107,13 @@ function saveColors() {
     });
 }
 
-function applyCustomColors({ color1, color2, color3, color4 }) {
-    const root = document.documentElement;
-
-    const color1shades = generateShades(color1);
-    root.style.setProperty('--yellow-highlight', color1shades.highlight);
-    root.style.setProperty('--yellow-lowlight', color1shades.lowlight);
-    root.style.setProperty('--yellow-shadow', color1shades.shadow);
-    root.style.setProperty('--yellow-inset', color1shades.inset);
-
-    const color2shades = generateShades(color2);
-    root.style.setProperty('--blue-highlight', color2shades.highlight);
-    root.style.setProperty('--blue-lowlight', color2shades.lowlight);
-    root.style.setProperty('--blue-shadow', color2shades.shadow);
-    root.style.setProperty('--blue-inset', color2shades.inset);
-
-    const color3shades = generateShades(color3);
-    root.style.setProperty('--green-highlight', color3shades.highlight);
-    root.style.setProperty('--green-lowlight', color3shades.lowlight);
-    root.style.setProperty('--green-shadow', color3shades.shadow);
-    root.style.setProperty('--green-inset', color3shades.inset);
-
-    const color4shades = generateShades(color4);
-    root.style.setProperty('--red-highlight', color4shades.highlight);
-    root.style.setProperty('--red-lowlight', color4shades.lowlight);
-    root.style.setProperty('--red-shadow', color4shades.shadow);
-    root.style.setProperty('--red-inset', color4shades.inset);
-}
-
-function generateShades(hex) {
-    return {
-        highlight: hex,
-        lowlight: darken(hex, 10),
-        shadow: darken(hex, 20),
-        inset: darken(hex, 15)
-    };
-}
-
-function darken(hex, percent) {
-    const amt = Math.round(2.55 * percent);
-    const num = parseInt(hex.replace("#", ""), 16);
-    const R = Math.max((num >> 16) - amt, 0);
-    const G = Math.max(((num >> 8) & 0x00FF) - amt, 0);
-    const B = Math.max((num & 0x0000FF) - amt, 0);
-    return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
-}
-
-function lighten(hex, percent) {
-    const amt = Math.round(2.55 * percent);
-    const num = parseInt(hex.replace("#", ""), 16);
-    const R = Math.min((num >> 16) + amt, 255);
-    const G = Math.min(((num >> 8) & 0x00FF) + amt, 255);
-    const B = Math.min((num & 0x0000FF) + amt, 255);
-    return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
-}
-
 // changing theme
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if(request.action =="updateTheme"){
+      changeTheme(request.theme);
+    }
+});
+
 colorMode.addEventListener("click", () => {
     let currentThemeSetting = document.querySelector("html").getAttribute("data-theme");
     let newTheme = currentThemeSetting === "dark" ? "light" : "dark";

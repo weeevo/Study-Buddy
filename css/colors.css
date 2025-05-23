@@ -5,6 +5,7 @@
     --text: #ffffff;
     --text-placeholder: #bdb8b8;
     --button-bg: #2e2b2b;
+    --button-shadow: #100e0e;
     --screen: #54564f;
     --list-light: #626759;
     --list-hover: #3f413b;
@@ -37,6 +38,7 @@
     --text: #000000;
     --text-placeholder: #737272;
     --button-bg: #f4f5f6;
+    --button-shadow: #b9b4b4;
     --screen: #e1e6dd;
     --list-light: #eaefe1;
     --list-hover: #d6dbca;

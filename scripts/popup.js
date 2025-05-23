@@ -176,7 +176,6 @@ function resetTimer() {
     stopButton.style.display = "none";
     set.style.display = "grid";
     display.style.display = "none";
-    timerActive = false;
 }
 
 function skipTimer() {
@@ -274,7 +273,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             break
         default:
             addButton.classList.add("disabled");
-            addLabel.textContent = "Cannot Add"
+            addLabel.textContent = "Cannot add current page"
             break
     }
 
@@ -282,7 +281,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         case "newtab":
         case "extensions":
             addButton.classList.add("disabled");
-            addLabel.textContent = "Cannot Add"
+            addLabel.textContent = "Cannot add current page"
             break
         default:
             if (!addButton.classList.contains("disabled")) { addButton.classList.remove("disabled"); }
@@ -291,7 +290,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 
     function renderButtonAndList(blockedSites) {
         const isBlocked = blockedSites.includes(hostname);
-        if (addLabel.textContent != "Cannot Add") {
+        if (addLabel.textContent != "Cannot add current page") {
             addLabel.textContent = isBlocked ? `Remove ` : `Add`;
             activeTabURL.textContent = hostname;
         }
