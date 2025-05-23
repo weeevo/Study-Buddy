@@ -20,10 +20,8 @@ async function ensureOverlayInjected(remainingTime) {
   requestIdleCallback(tryInject);
 }
 
-// helper function to convert time in ms to hr:min:sec format
 function formatTime(ms) {
   let totalSeconds = Math.floor(ms / 1000);
-
   let hours = Math.floor(totalSeconds / 3600);
   let minutes = Math.floor((totalSeconds % 3600) / 60);
   let seconds = totalSeconds % 60;
@@ -58,6 +56,17 @@ function injectBlockingOverlay(remainingTime) {
   host.style.pointerEvents = "none";
 
   overlayShadowRoot = host.attachShadow({ mode: "open" });
+  chrome.storage.local.get(["colors"], (result) => {
+    const stored = result.colors || {};
+    const color1 = stored.color1 ?? "#edb110";
+    const color2 = stored.color2 ?? "#2245d3";
+    const color3 = stored.color3 ?? "#10cb00";
+    const color4 = stored.color4 ?? "#d3191d";
+
+    const style = document.createElement("style");
+    style.textContent = generateStyleString({ color1, color2, color3, color4 });
+    overlayShadowRoot.appendChild(style);
+  });
 
   const SSC300 = chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-300.woff2');
   const SSC400 = chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-regular.woff2');
@@ -220,45 +229,45 @@ function injectBlockingOverlay(remainingTime) {
         margin-left: 5px;
     }
 
-    .yellow{
-      background: linear-gradient( #edb110, #c78010);
-      box-shadow: inset 0 -6.4px #9b6a1b;
-    }
+.yellow{
+    background: linear-gradient(var(--yellow-highlight), var(--yellow-lowlight));
+    box-shadow: inset 0 -.4rem var(--yellow-shadow);
+}
 
-    .yellow:active{
-        box-shadow: inset 0 6.4px #c59000;
-        transform: translateY(2px);
-    }
+.yellow:active{
+    box-shadow: inset 0 .4rem var(--yellow-inset);
+    transform: translateY(2px);
+}
 
-    .blue{
-        background: linear-gradient( #2245d3, #1417bb);
-        box-shadow: inset 0 -6.4px #0407a7;
-    }
+.blue{
+    background: linear-gradient(var(--blue-highlight), var(--blue-lowlight));
+    box-shadow: inset 0 -.4rem var(--blue-shadow);
+}
 
-    .blue:active{
-        box-shadow: inset 0 6.4px #0e2fb1;
-        transform: translateY(2px);
-    }
+.blue:active{
+    box-shadow: inset 0 .4rem var(--blue-inset);
+    transform: translateY(2px);
+}
 
-    .green{
-        background: linear-gradient( #10cb00, #078f00);
-        box-shadow: inset 0 -6.4px #1d740b;
-    }
+.green{
+    background: linear-gradient(var(--green-highlight), var(--green-lowlight));
+    box-shadow: inset 0 -.4rem var(--green-shadow);
+}
 
-    .green:active{
-        box-shadow: inset 0 6.4px #0ea506;
-        transform: translateY(2px);
-    }
+.green:active{
+    box-shadow: inset 0 .4rem var(--green-inset);
+    transform: translateY(2px);
+}
 
-    .red{
-        background: linear-gradient( #d3191d, #ab1b1b);
-        box-shadow: inset 0 -6.4px #890606;
-    }
+.red{
+    background: linear-gradient(var(--red-highlight), var(--red-lowlight));
+    box-shadow: inset 0 -.4rem var(--red-shadow);
+}
 
-    .red:active{
-        box-shadow: inset 0 -6.4px #ab0a0d;
-        transform: translateY(2px);
-    }
+.red:active{
+    box-shadow: inset 0 .4rem var(--red-inset);
+    transform: translateY(2px);
+}
   `;
 
   const overlay = document.createElement("div");
@@ -311,7 +320,7 @@ function injectBlockingOverlay(remainingTime) {
   };
 
   overlayShadowRoot.getElementById("colorMode").onclick = () => {
-    currentThemeSetting = overlayShadowRoot.querySelector("#site-blocker-overlay").getAttribute("data-theme");
+    let currentThemeSetting = overlayShadowRoot.querySelector("#site-blocker-overlay").getAttribute("data-theme");
     let newTheme = currentThemeSetting === "dark" ? "light" : "dark";
 
     if (newTheme == "dark") { changeToDark() }
@@ -343,6 +352,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   const timerData = request.timerData;
   const timerEl = overlayShadowRoot.getElementById("block-timer");
   const timerh1 = overlayShadowRoot.getElementById("timer-header");
+  chrome.storage.local.get(["colors"], (result) => {
+    const stored = result.colors || {};
+    const color1 = stored.color1 ?? "#edb110";
+    const color2 = stored.color2 ?? "#2245d3";
+    const color3 = stored.color3 ?? "#10cb00";
+    const color4 = stored.color4 ?? "#d3191d";
+
+    const style = document.createElement("style");
+    style.textContent = generateStyleString({ color1, color2, color3, color4 });
+    overlayShadowRoot.appendChild(style);
+  });
   if (request.action == "updateUI") {
     chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href }, (res) => {
       if (!res) return;
@@ -374,7 +394,7 @@ function injectNotif() {
   host.style.padding = "0";
   host.style.margin = "0";
   host.style.border = "0";
-  
+
   host.style.zIndex = "999999"
   document.body.appendChild(host);
 
@@ -615,39 +635,39 @@ function timerSwitchAlert(active, phase, workDur, breakDur) {
   }
 }
 
-async function preloadFonts(){
+async function preloadFonts() {
   // sofia sans normal 300
   const font1 = new FontFace(
     'Sofia Sans Condensed',
     `url(${chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-300.woff2')})`,
-    { weight: '300', style: 'normal'}
+    { weight: '300', style: 'normal' }
   );
 
   const font5 = new FontFace(
     'Sofia Sans Condensed',
     `url(${chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-regular.woff2')})`,
-    { weight: '400', style: 'normal'}
+    { weight: '400', style: 'normal' }
   );
 
   // sofia sans italic 200
   const font2 = new FontFace(
     'Sofia Sans Condensed',
     `url(${chrome.runtime.getURL('fonts/sofia-sans-condensed-v2-latin-200italic.woff2')})`,
-    { weight: '200', style: 'italic'}
+    { weight: '200', style: 'italic' }
   );
 
   // dm serif display normal 400
   const font3 = new FontFace(
     'DM Serif Display',
     `url(${chrome.runtime.getURL('fonts/dm-serif-display-v15-latin-regular.woff2')})`,
-    { weight: '700', style: 'normal'}
+    { weight: '700', style: 'normal' }
   );
 
   // dm serif display italic 400
   const font4 = new FontFace(
     'DM Serif Display',
     `url(${chrome.runtime.getURL('fonts/dm-serif-display-v15-latin-italic.woff2')})`,
-    { weight: '700', style: 'italic'}
+    { weight: '700', style: 'italic' }
   );
 
   await Promise.all([font1.load(), font2.load(), font3.load(), font4.load(), font5.load()]);
@@ -682,25 +702,25 @@ function changeToLight() {
   overlayShadowRoot.querySelector(".icon").style.fill = "#000000"
 
   // button colors
-  overlayShadowRoot.querySelector(".yellow").style.background = "linear-gradient( #F8C63F, #E4A238)";
-  overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #CD9131";
-  overlayShadowRoot.querySelector(".yellow").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 6.4px #D8AB34" });
-  overlayShadowRoot.querySelector(".yellow").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #CD9131" });
+  // overlayShadowRoot.querySelector(".yellow").style.background = "linear-gradient( #F8C63F, #E4A238)";
+  // overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #CD9131";
+  // overlayShadowRoot.querySelector(".yellow").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 6.4px #D8AB34" });
+  // overlayShadowRoot.querySelector(".yellow").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #CD9131" });
 
-  overlayShadowRoot.querySelector(".blue").style.background = "linear-gradient( #3F64F8, #383BE4)";
-  overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #3134CD";
-  overlayShadowRoot.querySelector(".blue").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 6.4px #3455D8" });
-  overlayShadowRoot.querySelector(".blue").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #3134CD" });
+  // overlayShadowRoot.querySelector(".blue").style.background = "linear-gradient( #3F64F8, #383BE4)";
+  // overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #3134CD";
+  // overlayShadowRoot.querySelector(".blue").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 6.4px #3455D8" });
+  // overlayShadowRoot.querySelector(".blue").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #3134CD" });
 
-  overlayShadowRoot.querySelector(".green").style.background = "linear-gradient( #55D34A, #34A92E)";
-  overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 -6.4px #32941E";
-  overlayShadowRoot.querySelector(".green").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 6.4px #3FC038" });
-  overlayShadowRoot.querySelector(".green").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 -6.4px  #32941E" });
+  // overlayShadowRoot.querySelector(".green").style.background = "linear-gradient( #55D34A, #34A92E)";
+  // overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 -6.4px #32941E";
+  // overlayShadowRoot.querySelector(".green").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 6.4px #3FC038" });
+  // overlayShadowRoot.querySelector(".green").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 -6.4px  #32941E" });
 
-  overlayShadowRoot.querySelector(".red").style.background = "linear-gradient( #E24F52, #C52F2F)";
-  overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 -6.4px #BA2222";
-  overlayShadowRoot.querySelector(".red").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 6.4px #D9393C" });
-  overlayShadowRoot.querySelector(".red").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 -6.4px #BA2222" });
+  // overlayShadowRoot.querySelector(".red").style.background = "linear-gradient( #E24F52, #C52F2F)";
+  // overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 -6.4px #BA2222";
+  // overlayShadowRoot.querySelector(".red").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 6.4px #D9393C" });
+  // overlayShadowRoot.querySelector(".red").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 -6.4px #BA2222" });
 
   // notification
   notifShadowRoot.querySelector("#content").style.backgroundColor = "rgba(230, 230, 230, .99)";
@@ -730,25 +750,25 @@ function changeToDark() {
   overlayShadowRoot.querySelector("#colorMode").style.color = "#ffffff"
 
   // button colors
-  overlayShadowRoot.querySelector(".yellow").style.background = "linear-gradient( #edb110, #c78010)";
-  overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #9b6a1b";
-  overlayShadowRoot.querySelector(".yellow").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 6.4px #c59000" });
-  overlayShadowRoot.querySelector(".yellow").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #9b6a1b" });
+  // overlayShadowRoot.querySelector(".yellow").style.background = "linear-gradient( #edb110, #c78010)";
+  // overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #9b6a1b";
+  // overlayShadowRoot.querySelector(".yellow").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 6.4px #c59000" });
+  // overlayShadowRoot.querySelector(".yellow").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".yellow").style.boxShadow = "inset 0 -6.4px #9b6a1b" });
 
-  overlayShadowRoot.querySelector(".blue").style.background = "linear-gradient( #2245d3, #1417bb)";
-  overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #0407a7";
-  overlayShadowRoot.querySelector(".blue").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 6.4px #0e2fb1" });
-  overlayShadowRoot.querySelector(".blue").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #0407a7" });
+  // overlayShadowRoot.querySelector(".blue").style.background = "linear-gradient( #2245d3, #1417bb)";
+  // overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #0407a7";
+  // overlayShadowRoot.querySelector(".blue").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 6.4px #0e2fb1" });
+  // overlayShadowRoot.querySelector(".blue").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".blue").style.boxShadow = "inset 0 -6.4px #0407a7" });
 
-  overlayShadowRoot.querySelector(".green").style.background = "linear-gradient( #10cb00, #078f00)";
-  overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 -6.4px #1d740b";
-  overlayShadowRoot.querySelector(".green").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 6.4px #0ea506" });
-  overlayShadowRoot.querySelector(".green").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 -6.4px  #1d740b" });
+  // overlayShadowRoot.querySelector(".green").style.background = "linear-gradient( #10cb00, #078f00)";
+  // overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 -6.4px #1d740b";
+  // overlayShadowRoot.querySelector(".green").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 6.4px #0ea506" });
+  // overlayShadowRoot.querySelector(".green").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".green").style.boxShadow = "inset 0 -6.4px  #1d740b" });
 
-  overlayShadowRoot.querySelector(".red").style.background = "linear-gradient( #d3191d, #ab1b1b)";
-  overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 -6.4px #890606";
-  overlayShadowRoot.querySelector(".red").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 6.4px #ab0a0d" });
-  overlayShadowRoot.querySelector(".red").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 -6.4px #890606" });
+  // overlayShadowRoot.querySelector(".red").style.background = "linear-gradient( #d3191d, #ab1b1b)";
+  // overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 -6.4px #890606";
+  // overlayShadowRoot.querySelector(".red").addEventListener("mousedown", () => { overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 6.4px #ab0a0d" });
+  // overlayShadowRoot.querySelector(".red").addEventListener("mouseup", () => { overlayShadowRoot.querySelector(".red").style.boxShadow = "inset 0 -6.4px #890606" });
 
   // notification
   notifShadowRoot.querySelector("#content").style.backgroundColor = "rgba(36, 35, 35, .99)";
@@ -761,4 +781,59 @@ function changeToDark() {
   notifShadowRoot.querySelector("#timerLength").style.backgroundColor = "#54564f";
   notifShadowRoot.querySelector(".thumb-up").style.fill = "#ffffff";
   notifShadowRoot.querySelector("#timerLength").style.boxShadow = "inset 0 0 5px 3px  #3c3e38";
+}
+
+function generateStyleString({ color1, color2, color3, color4 }) {
+  const y = generateShades(color1);
+  const b = generateShades(color2);
+  const g = generateShades(color3);
+  const r = generateShades(color4);
+
+  return `
+      :host {
+        --yellow-highlight: ${y.highlight};
+        --yellow-lowlight: ${y.lowlight};
+        --yellow-shadow: ${y.shadow};
+        --yellow-inset: ${y.inset};
+        --blue-highlight: ${b.highlight};
+        --blue-lowlight: ${b.lowlight};
+        --blue-shadow: ${b.shadow};
+        --blue-inset: ${b.inset};
+        --green-highlight: ${g.highlight};
+        --green-lowlight: ${g.lowlight};
+        --green-shadow: ${g.shadow};
+        --green-inset: ${g.inset};
+        --red-highlight: ${r.highlight};
+        --red-lowlight: ${r.lowlight};
+        --red-shadow: ${r.shadow};
+        --red-inset: ${r.inset};
+      }
+    `;
+}
+
+function generateShades(hex) {
+  return {
+    highlight: hex,
+    lowlight: darken(hex, 10),
+    shadow: darken(hex, 20),
+    inset: darken(hex, 15)
+  };
+}
+
+function darken(hex, percent) {
+  const amt = Math.round(2.55 * percent);
+  const num = parseInt(hex.replace("#", ""), 16);
+  const R = Math.max((num >> 16) - amt, 0);
+  const G = Math.max(((num >> 8) & 0x00FF) - amt, 0);
+  const B = Math.max((num & 0x0000FF) - amt, 0);
+  return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
+}
+
+function lighten(hex, percent) {
+  const amt = Math.round(2.55 * percent);
+  const num = parseInt(hex.replace("#", ""), 16);
+  const R = Math.min((num >> 16) + amt, 255);
+  const G = Math.min(((num >> 8) & 0x00FF) + amt, 255);
+  const B = Math.min((num & 0x0000FF) + amt, 255);
+  return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
 }

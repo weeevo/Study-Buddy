@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/colors.css" type="text/css">
+    <link rel="stylesheet" href="../css/options.css" type="text/css">
+    <!-- fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sofia+Sans+Condensed:ital,wght@0,1..1000;1,1..1000&display=swap">
+    <title>Study Buddy Options</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">Studdy Buddy</div>
+        <form class="border">
+            <fieldset>
+                <legend>Blocking Behavior</legend>
+                <label><input type="checkbox" name="automute" id="automute" checked> Auto mute blocked websites</label>
+                <label><input type="checkbox" name="whitelist" id="whitelist" checked> Block all websites by default</label>
+                <p style="margin-left: 1.8rem;">By unchecking this box, Study Buddy will only block the websites in the site list</p>
+            </fieldset>
+            <fieldset style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <legend>Timer Order</legend>
+                <label style="gap: .5rem"><input type="radio" name="timer-order" id="work-break" checked> Work,
+                    Break</label>
+                <label style="gap: .5rem"><input type="radio" name="timer-order" id="break-work"> Break, Work</label>
+            </fieldset>
+            <fieldset>
+                <legend>Button Colors</legend>
+                <label class="colors">
+                    <input type="color" id="color1" value="#edb110">
+                    <input type="color" id="color2" value="#2245d3">
+                    <input type="color" id="color3" value="#10cb00">
+                    <input type="color" id="color4" value="#d3191d">       
+                 </label>
+                 <a id="resetColors">Reset Colors</a>
+            </fieldset>
+        </form>
+        <div class="buttons">
+            <button class="blue" id="save">Save Options</button>
+        </div>
+    </div>
+    <footer>
+        <a id="colorMode">Switch to Light Mode
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z" /></svg>
+        </a>
+    </footer>
+</body>
+<script type="module" src="scripts/options.js"></script>
+
+</html>

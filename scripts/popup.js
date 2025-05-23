@@ -1,3 +1,6 @@
+import { applyCustomColors } from "./shared.js";
+import { formatTime } from "./shared.js";
+
 //tabs
 const timerTab = document.getElementById("timerTab");
 const timer = document.getElementById("timer");
@@ -65,16 +68,10 @@ sitesTab.addEventListener("click", () => {
 })
 
 colorMode.addEventListener("click", () => {
-    currentThemeSetting = document.querySelector("html").getAttribute("data-theme");
+    let currentThemeSetting = document.querySelector("html").getAttribute("data-theme");
     let newTheme = currentThemeSetting === "dark" ? "light" : "dark";
-    if (newTheme == "dark") {
-        colorMode.innerHTML = 'Switch to Light Mode <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z"/></svg>';
-        document.querySelector("html").setAttribute("data-theme", "light");
-    }
-    else {
-        colorMode.innerHTML = 'Switch to Dark Mode <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/></svg>';
-        document.querySelector("html").setAttribute("data-theme", "dark");
-    }
+    changeTheme(newTheme)
+
     document.querySelector("html").setAttribute("data-theme", newTheme);
     chrome.runtime.sendMessage({
         action: "saveTheme",
@@ -165,19 +162,6 @@ function renderTimerState(timerData) {
     }
 }
 
-function formatTime(ms) {
-    let totalSeconds = Math.floor(ms / 1000);
-    let hours = Math.floor(totalSeconds / 3600);
-    let minutes = Math.floor((totalSeconds % 3600) / 60);
-    let seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-        return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-    } else {
-        return `${minutes}:${String(seconds).padStart(2, "0")}`;
-    }
-}
-
 function resetTimer() {
     chrome.runtime.sendMessage({ action: "resetTimer" })
     removeOverlayAllTabs()
@@ -253,13 +237,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     else if (request.action == "updateUI") {
         renderTimerState(request.timerData);
     }
-    if(request.action === "updateTheme"){
+    if (request.action === "updateTheme") {
         changeTheme(request.theme);
     }
 });
 
 // ask for UI updates whenever the popup is opened
 chrome.runtime.sendMessage({ action: "updatePopup" });
+updateButtonColors();
+updateTabLabel();
 
 //changing the theme
 chrome.runtime.sendMessage({ action: "getTheme" }, (response) => {
@@ -267,6 +253,7 @@ chrome.runtime.sendMessage({ action: "getTheme" }, (response) => {
 });
 
 function changeTheme(theme) {
+
     if (theme == "dark") {
         colorMode.innerHTML = 'Switch to Light Mode <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M480-280q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z"/></svg>';
         document.querySelector("html").setAttribute("data-theme", "dark");
@@ -281,21 +268,36 @@ function changeTheme(theme) {
 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     const url = new URL(tabs[0].url);
     const hostname = url.hostname.replace(/^www\./, "");
+    switch (url.protocol) {
+        case "http:":
+        case "https:":
+            break
+        default:
+            addButton.classList.add("disabled");
+            addLabel.textContent = "Cannot Add"
+            break
+    }
 
     switch (hostname) {
         case "newtab":
         case "extensions":
             addButton.classList.add("disabled");
+            addLabel.textContent = "Cannot Add"
             break
         default:
-            addButton.classList.remove("disabled");
+            if (!addButton.classList.contains("disabled")) { addButton.classList.remove("disabled"); }
             break
     }
 
     function renderButtonAndList(blockedSites) {
         const isBlocked = blockedSites.includes(hostname);
-        addLabel.textContent = isBlocked ? `Remove ` : `Add`;
-        activeTabURL.textContent = hostname;
+        if (addLabel.textContent != "Cannot Add") {
+            addLabel.textContent = isBlocked ? `Remove ` : `Add`;
+            activeTabURL.textContent = hostname;
+        }
+        else {
+            activeTabURL.textContent = "";
+        }
 
         // Clear and rebuild the list
         siteList.innerHTML = '';
@@ -355,5 +357,28 @@ function removeOverlayActiveTab() {
         if (tabs.length > 0) {
             chrome.tabs.sendMessage(tabs[0].id, { action: "viewOnce" });
         }
+    });
+}
+
+function updateTabLabel() {
+    chrome.runtime.sendMessage({ action: "getBlockBehavior" }, (response) => {
+        if (response) {
+            sitesTab.textContent = "Blocked Sites"
+        }
+        else {
+            sitesTab.textContent = "Allowed Sites"
+        }
+    })
+}
+
+function updateButtonColors(){
+    chrome.storage.local.get(["colors"], (result) => {
+        const stored = result.colors || {};
+        const color1 = stored.color1 ?? "#edb110";
+        const color2 = stored.color2 ?? "#2245d3";
+        const color3 = stored.color3 ?? "#10cb00";
+        const color4 = stored.color4 ?? "#d3191d";
+
+        applyCustomColors({ color1, color2, color3, color4 });
     });
 }

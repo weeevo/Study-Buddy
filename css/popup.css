@@ -334,7 +334,7 @@ footer{
     padding-inline: .5rem;
     padding-top: .1rem;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
 }
 
@@ -342,6 +342,7 @@ a{
     display: flex;
     flex-direction: row;
     align-items: center;
+    gap: 5px;
     padding: 2px;
     font-size: 1rem;
     font-weight: 200;
@@ -354,57 +355,4 @@ a{
     fill: var(--text);
     transform: translateY(-1px) scale(1);
     width: 20px;
-    margin-left: 5px;
-}
-
-/* button colors */
-.yellow{
-    background: linear-gradient(var(--yellow-highlight), var(--yellow-lowlight));
-    box-shadow: inset 0 -.4rem var(--yellow-shadow);
-    /* outline: 4px solid #FACF59; */
-}
-
-.yellow:active{
-    box-shadow: inset 0 .4rem var(--yellow-inset);
-    transform: translateY(2px);
-}
-
-.blue{
-    background: linear-gradient(var(--blue-highlight), var(--blue-lowlight));
-    box-shadow: inset 0 -.4rem var(--blue-shadow);
-    /* outline: 4px solid #4f70f3; */
-}
-
-.blue:active{
-    box-shadow: inset 0 .4rem var(--blue-inset);
-    transform: translateY(2px);
-}
-
-.green{
-    background: linear-gradient(var(--green-highlight), var(--green-lowlight));
-    box-shadow: inset 0 -.4rem var(--green-shadow);
-    /* outline: 4px solid #4cdb3f; */
-}
-
-.green:active{
-    box-shadow: inset 0 .4rem var(--green-inset);
-    transform: translateY(2px);
-}
-
-.red{
-    background: linear-gradient(var(--red-highlight), var(--red-lowlight));
-    box-shadow: inset 0 -.4rem var(--red-shadow);
-    /* outline: 4px solid #da5151; */
-}
-
-.red:active{
-    box-shadow: inset 0 .4rem var(--red-inset);
-    transform: translateY(2px);
-}
-
-.disabled{
-    background: linear-gradient(var(--disabled-highlight), var(--disabled-lowlight));
-    box-shadow: inset 0 -.4rem var(--disabled-shadow);
-    pointer-events: none;
-    cursor: unset;
 }

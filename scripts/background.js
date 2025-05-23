@@ -4,6 +4,7 @@ let viewOnceTabId = null;
 // this marks the start of the timer functionality
 let timerData = {
   isRunning: false,
+  startPhase: 'Work',
   phase: 'Work',
   remainingTime: 0,
   repeats: 0,
@@ -15,9 +16,16 @@ let timerData = {
   theme: "dark"
 };
 
+let optionsData = {
+  automute: true,
+  whitelist: false, // by default, block behaviour is not a blacklist!
+  order: true // true means work starts first
+}
+
 function startTimer() {
   timerData.isRunning = true;
-  timerData.phase = 'Work';
+  timerData.startPhase = optionsData.order ? 'Work' : 'Break';
+  timerData.phase = optionsData.order ? 'Work' : 'Break';
   runTimer(true);
 }
 
@@ -40,7 +48,7 @@ function runTimer(resetRemainingTime = false) {
       timerData.remainingTime = 0;
       clearInterval(timerData.intervalId);
       timerData.phase = timerData.phase === 'Work' ? 'Break' : 'Work';
-      if (timerData.phase == "Work") { timerData.repeats--; }
+      if (timerData.phase == timerData.startPhase) { timerData.repeats--; }
 
       if ((timerData.repeats < 0)) {
         timerData.isRunning = false;
@@ -72,12 +80,13 @@ function runTimer(resetRemainingTime = false) {
 
 // calls this every second to update the timer frontend
 function updateUI() {
-  chrome.storage.local.get(["timerData", "blockedSites"], () => {
+  chrome.storage.local.get(["timerData", "blockedSites", "optionsData"], () => {
     if (timerData.isRunning) {
       chrome.runtime.sendMessage({
         action: "updateUI",
         timerData: timerData,
-        blockedSites: blockedSites
+        blockedSites: blockedSites,
+        optionsData: optionsData
       })
       chrome.tabs.query({}, function (tabs) {
         tabs.forEach(tab => {
@@ -113,6 +122,7 @@ function updateTheme() {
 
 function saveTimerState() {
   chrome.storage.local.set({ timerData });
+  chrome.storage.local.set({ optionsData });
 
   if (timerData.isRunning) {
     const totalSeconds = Math.floor(timerData.remainingTime / 1000);
@@ -158,6 +168,7 @@ function pauseTimer() {
 function removeOverlayAllTabs() {
   chrome.tabs.query({}, function (tabs) {
     tabs.forEach(tab => {
+      chrome.tabs.update(tabId, { muted: false });
       chrome.tabs.sendMessage(tab.id, { action: "hideOverlay" });
     });
   });
@@ -214,14 +225,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // skips to next timer
   else if (request.action === "skipTimer") {
     timerData.phase = timerData.phase === 'Work' ? 'Break' : 'Work';
-    if (timerData.phase == "Work") {
+    if (timerData.phase == timerData.startPhase) {
       timerData.repeats--;
-      timerData.remainingTime = timerData.workDuration;
     }
-    else {
-      timerData.remainingTime = timerData.breakDuration;
+    if(timerData.phase == "Break"){
       removeOverlayAllTabs();
     }
+
     if ((timerData.repeats < 0)) {
       timerData.isRunning = false;
       timerData.remainingTime = 0;
@@ -297,7 +307,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const hostname = url.hostname.replace(/^www\./, "");
     chrome.storage.local.get(["timerData", "blockedSites", "viewOnceTabId"], (result) => {
       const isBlocked =
-        !result.blockedSites?.includes(hostname) &&
+        result.blockedSites?.includes(hostname) == optionsData.whitelist &&
         result.timerData?.isRunning &&
         result.timerData?.phase === "Work" &&
         result.viewOnceTabId !== tabId &&
@@ -305,9 +315,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       // console.log("isblocked is " + isBlocked + " because:\nresult.blockedSites?.includes(hostname) is " + result.blockedSites?.includes(hostname) + " and\nresult.timerData?.isRunning is " + result.timerData?.isRunning + " and\nresult.timerData?.phase === 'Work' is " + (result.timerData?.phase === 'Work') + " and\nresult.viewOnceTabId !== tabId is " + (result.viewOnceTabId !== tabId) + " and\nresult.remainingTime !== 0 is " + (result.remainingTime !== 0) + "");
 
       if (isBlocked) {
-        chrome.tabs.update(tabId, { muted: true });
-      } else {
-        chrome.tabs.update(tabId, { muted: false });
+        if(optionsData.automute){
+          chrome.tabs.update(tabId, { muted: true });
+        } else {
+          chrome.tabs.update(tabId, { muted: false });
+        }
       }
 
       sendResponse({ blocked: isBlocked, timerData: timerData });
@@ -355,3 +367,17 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
 function muteTab(tabId) {
   chrome.tabs.update(tabId, { muted: true });
 }
+
+// updating options
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if(request.action == "updateOptions"){
+    optionsData = request.data;
+    saveTimerState();
+  }
+  if(request.action == "getOptions"){
+    sendResponse(optionsData);
+  }
+  if(request.action == "getBlockBehavior"){
+    sendResponse(optionsData.whitelist);
+  }
+})
