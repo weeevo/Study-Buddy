@@ -25,3 +25,10 @@ During the work timer, every site on the block list will be blocked by an overla
 **Rremove the site from the block list**, removing the overlay permamently unless the site is added to the list again.  
 **End the work session early**, starting the break timer and unblocking every page until the break is over.  
 **End the timer**, turning off both the work and break timers and marking the end of the focus session (for now)  
+
+### Wanna change something?   
+Click **Options** in the popup to customize Study Buddy to your liking!  
+Change blocking functionality from an allowlist to a blocklist,  
+Change the order of the timers for reverse Pomodoro,  
+Disable blocked tab automuting, and  
+Change button colors to anything you could imagine!
