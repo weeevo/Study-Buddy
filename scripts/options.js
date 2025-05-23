@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
         automute.checked = response.automute;
         whitelist.checked = !response.whitelist;
         timerOrderOptions[0].checked = response.order;
-        timerInputOptions[0].checked = response.format;
+        timerInputOptions[0].checked = !response.format;
     })
 
     if(timerOrderOptions[0].checked){
@@ -102,7 +102,7 @@ function saveOptions() {
             automute: settings.automute,
             whitelist: settings.whitelist,
             order: settings.timerOrder,
-            format: settings.inputType
+            format: !settings.inputType
         }
     })
 }
