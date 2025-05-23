@@ -14,18 +14,22 @@
     --yellow-lowlight: #c78010;
     --yellow-shadow: #9b6a1b;
     --yellow-inset: #c59000;
+    --yellow-text: #ffffff;
     --blue-highlight: #2245d3;
     --blue-lowlight: #1417bb;
     --blue-shadow: #0407a7;
     --blue-inset: #0e2fb1;
+    --blue-text: #ffffff;
     --green-highlight: #10cb00;
     --green-lowlight: #078f00;
     --green-shadow: #1d740b;
     --green-inset: #0ea506;
+    --green-text: #ffffff;
     --red-highlight: #d3191d;
     --red-lowlight: #ab1b1b;
     --red-shadow: #890606;
     --red-inset: #ab0a0d;
+    --red-text: #ffffff;
     --disabled-highlight: #888888;
     --disabled-lowlight: #6d6d6d;
     --disabled-shadow: #585555;
@@ -66,6 +70,7 @@
 
 /* button colors */
 .yellow{
+    color: var(--yellow-text);
     background: linear-gradient(var(--yellow-highlight), var(--yellow-lowlight));
     box-shadow: inset 0 -.4rem var(--yellow-shadow);
     /* outline: 4px solid #FACF59; */
@@ -77,6 +82,7 @@
 }
 
 .blue{
+    color: var(--blue-text);
     background: linear-gradient(var(--blue-highlight), var(--blue-lowlight));
     box-shadow: inset 0 -.4rem var(--blue-shadow);
     /* outline: 4px solid #4f70f3; */
@@ -88,6 +94,7 @@
 }
 
 .green{
+    color: var(--green-text);
     background: linear-gradient(var(--green-highlight), var(--green-lowlight));
     box-shadow: inset 0 -.4rem var(--green-shadow);
     /* outline: 4px solid #4cdb3f; */
@@ -99,6 +106,7 @@
 }
 
 .red{
+    color: var(--red-text);
     background: linear-gradient(var(--red-highlight), var(--red-lowlight));
     box-shadow: inset 0 -.4rem var(--red-shadow);
     /* outline: 4px solid #da5151; */
@@ -110,6 +118,7 @@
 }
 
 .disabled{
+    color: #ffffff;
     background: linear-gradient(var(--disabled-highlight), var(--disabled-lowlight));
     box-shadow: inset 0 -.4rem var(--disabled-shadow);
     pointer-events: none;

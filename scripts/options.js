@@ -34,6 +34,12 @@ document.addEventListener("DOMContentLoaded", () => {
         color2.value = storedColors.color2 ?? "#2245d3";
         color3.value = storedColors.color3 ?? "#10cb00";
         color4.value = storedColors.color4 ?? "#d3191d";
+        applyCustomColors({
+            color1: storedColors.color1, 
+            color2: storedColors.color2, 
+            color3: storedColors.color3, 
+            color4: storedColors.color4
+        })
     })
 
     chrome.runtime.sendMessage({ action: "getTheme" }, (response) => {

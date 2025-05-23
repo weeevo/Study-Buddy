@@ -128,7 +128,6 @@ button{
     border-radius: 100px;
     transition: all .1s ease;
     outline-offset: 2px;
-    color: white;
 }
 
 button:hover, 

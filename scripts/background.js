@@ -93,7 +93,8 @@ function updateUI() {
           chrome.tabs.sendMessage(tab.id, {
             action: "updateUI",
             timerData: timerData,
-            blockedSites: blockedSites
+            blockedSites: blockedSites,
+            optionsData: optionsData
           });
         });
       });
@@ -166,7 +167,7 @@ function pauseTimer() {
 function removeOverlayAllTabs() {
   chrome.tabs.query({}, function (tabs) {
     tabs.forEach(tab => {
-      chrome.tabs.update(tabId, { muted: false });
+      chrome.tabs.update(tab.id, { muted: false });
       chrome.tabs.sendMessage(tab.id, { action: "hideOverlay" });
     });
   });
@@ -175,6 +176,7 @@ function removeOverlayAllTabs() {
 function removeOverlayActiveTab() {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     if (tabs.length > 0) {
+      chrome.tabs.update(tabs[0].id, { muted: false });
       chrome.tabs.sendMessage(tabs[0].id, { action: "viewOnce" });
     }
   });
@@ -217,6 +219,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   // resets the timer when reset button is pressed
   else if (request.action === "resetTimer") {
+    removeOverlayAllTabs();
     notifyAllTabs();
     resetTimerState();
   }
@@ -319,6 +322,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           chrome.tabs.update(tabId, { muted: false });
         }
       }
+      else{
+        chrome.tabs.update(tabId, { muted: false });
+      }
 
       sendResponse({ blocked: isBlocked, timerData: timerData });
     });
@@ -362,8 +368,8 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
   });
 });
 
-function muteTab(tabId) {
-  chrome.tabs.update(tabId, { muted: true });
+function unmuteTab(tabId) {
+  chrome.tabs.update(tabId, { muted: false });
 }
 
 // updating options

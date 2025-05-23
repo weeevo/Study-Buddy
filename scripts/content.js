@@ -200,10 +200,9 @@ function injectBlockingOverlay(remainingTime) {
         position: absolute;
         bottom: 0;
         width: 100%;
-        box-sizing: border-box;
         background-color: #2e2b2b;
-        padding-inline: 16px;
-        padding-block: 8px;
+        box-sizing: border-box;
+        padding: 4px 24px;
         display: flex;
         justify-content: flex-end;
         align-items: center;
@@ -211,7 +210,7 @@ function injectBlockingOverlay(remainingTime) {
 
     #colorMode{
       font-family: "Sofia Sans Condensed", sans-serif;
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 200;
       font-style: italic;
       display: flex;
@@ -225,49 +224,53 @@ function injectBlockingOverlay(remainingTime) {
     .icon{
         fill: #ffffff;
         transform: translateY(-1px) scale(1);
-        width: 30px;
+        width: 20px;
         margin-left: 5px;
     }
 
-.yellow{
-    background: linear-gradient(var(--yellow-highlight), var(--yellow-lowlight));
-    box-shadow: inset 0 -.4rem var(--yellow-shadow);
-}
+    .yellow{
+        color: var(--yellow-text);
+        background: linear-gradient(var(--yellow-highlight), var(--yellow-lowlight));
+        box-shadow: inset 0 -.4rem var(--yellow-shadow);
+    }
 
-.yellow:active{
-    box-shadow: inset 0 .4rem var(--yellow-inset);
-    transform: translateY(2px);
-}
+    .yellow:active{
+        box-shadow: inset 0 .4rem var(--yellow-inset);
+        transform: translateY(2px);
+    }
 
-.blue{
-    background: linear-gradient(var(--blue-highlight), var(--blue-lowlight));
-    box-shadow: inset 0 -.4rem var(--blue-shadow);
-}
+    .blue{
+        color: var(--blue-text);
+        background: linear-gradient(var(--blue-highlight), var(--blue-lowlight));
+        box-shadow: inset 0 -.4rem var(--blue-shadow);
+    }
 
-.blue:active{
-    box-shadow: inset 0 .4rem var(--blue-inset);
-    transform: translateY(2px);
-}
+    .blue:active{
+        box-shadow: inset 0 .4rem var(--blue-inset);
+        transform: translateY(2px);
+    }
 
-.green{
-    background: linear-gradient(var(--green-highlight), var(--green-lowlight));
-    box-shadow: inset 0 -.4rem var(--green-shadow);
-}
+    .green{
+        color: var(--green-text);
+        background: linear-gradient(var(--green-highlight), var(--green-lowlight));
+        box-shadow: inset 0 -.4rem var(--green-shadow);
+    }
 
-.green:active{
-    box-shadow: inset 0 .4rem var(--green-inset);
-    transform: translateY(2px);
-}
+    .green:active{
+        box-shadow: inset 0 .4rem var(--green-inset);
+        transform: translateY(2px);
+    }
 
-.red{
-    background: linear-gradient(var(--red-highlight), var(--red-lowlight));
-    box-shadow: inset 0 -.4rem var(--red-shadow);
-}
+    .red{
+        color: var(--red-text);
+        background: linear-gradient(var(--red-highlight), var(--red-lowlight));
+        box-shadow: inset 0 -.4rem var(--red-shadow);
+    }
 
-.red:active{
-    box-shadow: inset 0 .4rem var(--red-inset);
-    transform: translateY(2px);
-}
+    .red:active{
+        box-shadow: inset 0 .4rem var(--red-inset);
+        transform: translateY(2px);
+    }
   `;
 
   const overlay = document.createElement("div");
@@ -276,7 +279,7 @@ function injectBlockingOverlay(remainingTime) {
   overlay.innerHTML = `
     <section class="title">
       <h1><span id="timer-header">It's work time. </span><em id="block-timer">${formatTime(remainingTime)}</em><em> Left</em></h1>
-      <p>This page is being blocked by Study Buddy because it's in the list of blocked sites</p>
+      <p id="reason">This page is being blocked by Study Buddy because it's in the list of blocked sites</p>
     </section>
     <section class="buttons">
       <button id="view-once" class="button yellow">View Once</button>
@@ -350,8 +353,12 @@ function injectBlockingOverlay(remainingTime) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   getTheme();
   const timerData = request.timerData;
+  const optionsData = request.optionsData;
+
   const timerEl = overlayShadowRoot.getElementById("block-timer");
   const timerh1 = overlayShadowRoot.getElementById("timer-header");
+  const blockReason = overlayShadowRoot.getElementById("reason");
+
   chrome.storage.local.get(["colors"], (result) => {
     const stored = result.colors || {};
     const color1 = stored.color1 ?? "#edb110";
@@ -363,6 +370,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     style.textContent = generateStyleString({ color1, color2, color3, color4 });
     overlayShadowRoot.appendChild(style);
   });
+
   if (request.action == "updateUI") {
     chrome.runtime.sendMessage({ action: "getBlockedStatus", url: window.location.href }, (res) => {
       if (!res) return;
@@ -378,6 +386,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         else if (timerData.phase == "Work" && timerData.isRunning) {
           timerh1.textContent = "It's work time. "
           showOverlay();
+        }
+        if(optionsData.whitelist){
+          blockReason.textContent = "This page is being blocked by Study Buddy because it's in the list of blocked sites";
+        }
+        else{
+          blockReason.textContent = "This page is being blocked by Study Buddy because it's not in the list of allowed sites";
         }
       }
     });
@@ -791,18 +805,25 @@ function generateStyleString({ color1, color2, color3, color4 }) {
 
   return `
       :host {
+        --yellow-text: ${y.text};
         --yellow-highlight: ${y.highlight};
         --yellow-lowlight: ${y.lowlight};
         --yellow-shadow: ${y.shadow};
         --yellow-inset: ${y.inset};
+
+        --blue-text: ${b.text};
         --blue-highlight: ${b.highlight};
         --blue-lowlight: ${b.lowlight};
         --blue-shadow: ${b.shadow};
         --blue-inset: ${b.inset};
+
+        --green-text: ${g.text};
         --green-highlight: ${g.highlight};
         --green-lowlight: ${g.lowlight};
         --green-shadow: ${g.shadow};
         --green-inset: ${g.inset};
+
+        --red-text: ${r.text};
         --red-highlight: ${r.highlight};
         --red-lowlight: ${r.lowlight};
         --red-shadow: ${r.shadow};
@@ -813,6 +834,7 @@ function generateStyleString({ color1, color2, color3, color4 }) {
 
 function generateShades(hex) {
   return {
+    text: getTextColor(hex),
     highlight: hex,
     lowlight: darken(hex, 10),
     shadow: darken(hex, 20),
@@ -836,4 +858,38 @@ function lighten(hex, percent) {
   const G = Math.min(((num >> 8) & 0x00FF) + amt, 255);
   const B = Math.min((num & 0x0000FF) + amt, 255);
   return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
+}
+
+function getTextColor(hex){
+    //convert to rgb
+    var r = parseInt(hex.substr(1,2), 16);
+    var g = parseInt(hex.substr(3,2), 16);
+    var b = parseInt(hex.substr(5,2), 16);
+
+    //convert to hsl
+    r /= 255;
+    g /= 255; 
+    b /= 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h, s, l = (max + min) / 2;
+
+    if(max == min){
+        h = s = 0; // achromatic
+    }else{
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch(max){
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+
+    if(l > .8){
+        return "#000000"
+    }
+    else{
+        return "#ffffff"
+    }
 }
