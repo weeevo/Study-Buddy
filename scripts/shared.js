@@ -124,7 +124,7 @@ function getTextColor(hex){
         h /= 6;
     }
 
-    if(l > .8){
+    if(l > .7){
         return "#000000"
     }
     else{
