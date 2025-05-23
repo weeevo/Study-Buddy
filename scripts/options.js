@@ -4,9 +4,12 @@ import { applyCustomColors } from "./shared.js";
 const automute = document.getElementById("automute");
 const whitelist = document.getElementById("whitelist");
 const timerOrderOptions = document.getElementsByName("timer-order");
+const timerInputOptions = document.getElementsByName("timer-input");
 
 const timerOrderopt1 = document.getElementById("work-break");
 const timerOrderopt2 = document.getElementById("break-work");
+const timerInputopt1 = document.getElementById("hr-min");
+const timerInputopt2 = document.getElementById("min-sec");
 
 const color1 = document.getElementById("color1");
 const color2 = document.getElementById("color2");
@@ -22,10 +25,15 @@ document.addEventListener("DOMContentLoaded", () => {
         automute.checked = response.automute;
         whitelist.checked = !response.whitelist;
         timerOrderOptions[0].checked = response.order;
+        timerInputOptions[0].checked = response.format;
     })
 
     if(timerOrderOptions[0].checked){
         timerOrderOptions[1].checked = true;
+    }
+
+    if(timerInputOptions[0].checked){
+        timerInputOptions[1].checked = true;
     }
 
     chrome.storage.local.get(["colors"], (result) => {
@@ -53,6 +61,8 @@ whitelist.addEventListener("change", saveOptions)
 
 timerOrderopt1.addEventListener("change", saveOptions)
 timerOrderopt2.addEventListener("change", saveOptions)
+timerInputopt1.addEventListener("change", saveOptions)
+timerInputopt2.addEventListener("change", saveOptions)
 
 color1.addEventListener("change", saveColors)
 color2.addEventListener("change", saveColors)
@@ -80,7 +90,8 @@ function saveOptions() {
     const settings = {
         automute: automute.checked,
         whitelist: !whitelist.checked,
-        timerOrder: timerOrderOptions[0].checked
+        timerOrder: timerOrderOptions[0].checked,
+        inputType: timerInputOptions[0].checked
     }
 
     chrome.storage.local.set(settings);
@@ -90,7 +101,8 @@ function saveOptions() {
         action: "updateOptions", data: {
             automute: settings.automute,
             whitelist: settings.whitelist,
-            order: settings.timerOrder
+            order: settings.timerOrder,
+            format: settings.inputType
         }
     })
 }

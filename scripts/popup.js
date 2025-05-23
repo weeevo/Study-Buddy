@@ -43,6 +43,7 @@ let workHourValue;
 let workMinuteValue;
 let breakHourValue;
 let breakMinuteValue;
+let timerFormat = false; //true represents hr:min, false represents min:sec
 
 //site
 const addButton = document.getElementById('add');
@@ -97,10 +98,18 @@ startButton.addEventListener("click", () => {
 stopButton.addEventListener("click", pauseTimer);
 
 function initializeTimer() {
-    workHourValue = parseFloat(workHourInput.value) || 0;
-    workMinuteValue = parseFloat(workMinuteInput.value) || 25;
-    breakHourValue = parseFloat(breakHourInput.value) || 0;
-    breakMinuteValue = parseFloat(breakMinuteInput.value) || 10;
+    if(timerFormat){
+        workHourValue = parseFloat(workHourInput.value) || 0;
+        workMinuteValue = parseFloat(workMinuteInput.value) || 25;
+        breakHourValue = parseFloat(breakHourInput.value) || 0;
+        breakMinuteValue = parseFloat(breakMinuteInput.value) || 10;
+    }
+    else{
+        workHourValue = parseFloat(workHourInput.value) ?? 25;
+        workMinuteValue = parseFloat(workMinuteInput.value) || 0;
+        breakHourValue = parseFloat(breakHourInput.value) ?? 10;
+        breakMinuteValue = parseFloat(breakMinuteInput.value) || 0;
+    }
 
     let repeatAmountValue = 0; // Default
     for (let i = 0; i < radios.length; i++) {
@@ -236,8 +245,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     else if (request.action == "updateUI") {
         renderTimerState(request.timerData);
     }
-    if (request.action === "updateTheme") {
+    else if (request.action === "updateTheme") {
         changeTheme(request.theme);
+    }
+    else if(request.action === "updateTimerOrder"){
+        if(!request.order){
+            document.getElementById("timers").style.flexDirection = "row-reverse"
+        }
+        else{
+            document.getElementById("timers").style.flexDirection = "row"
+        }
+        if(request.format){
+            timerFormat = true;
+            workHourInput.placeholder = "hr"
+            workMinuteInput.placeholder = "min"
+            breakHourInput.placeholder = "hr"
+            breakMinuteInput.placeholder = "min"
+        }
+        else{
+            timerFormat = false;
+            workHourInput.placeholder = "min"
+            workMinuteInput.placeholder = "sec"
+            breakHourInput.placeholder = "min"
+            breakMinuteInput.placeholder = "sec"
+        }
     }
 });
 

@@ -36,7 +36,10 @@ function formatTime(ms) {
 function formatTimeMinutes(ms) {
   let totalSeconds = Math.floor(ms / 1000);
   let minutes = totalSeconds / 60;
-  return minutes;
+  if(Math.floor(minutes) <= 0){
+    return [false, totalSeconds];
+  }
+  return [true, minutes];
 }
 
 // injected page content
@@ -639,12 +642,22 @@ function timerSwitchAlert(active, phase, workDur, breakDur) {
   }
   else if (phase === "Work") {
     let time = formatTimeMinutes(workDur)
-    showNotif("The break is over. It's work time for the next", time + "m")
+    if(time[0]){
+      showNotif("The break is over. It's work time for the next", time[1] + "m")
+    }
+    else{
+      showNotif("The break is over. It's work time for the next", time[1] + "s")
+    }
     showOverlay();
   }
   else {
     let time = formatTimeMinutes(breakDur);
-    showNotif("Good work! It's break time for the next", time + "m")
+    if(time[0]){
+      showNotif("Good work! It's break time for the next", time[1] + "m")
+    }
+    else{
+      showNotif("Good work! It's break time for the next", time[1] + "s")
+    }
     removeOverlay();
   }
 }

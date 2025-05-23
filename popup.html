@@ -23,15 +23,17 @@
         <div class="screen">
             <!-- set timer screen -->
             <div class="settings" id="set">
-                <div>
-                    <h1>Work Timer</h1>
-                    <input class="timer_input" placeholder="hr" type="number" min="0" id="workHours"><span>:</span>
-                    <input class="timer_input" placeholder="min" type="number" min="0" max="59" id="workMinutes">
-                </div>
-                <div>
-                    <h1>Break Timer</h1>
-                    <input class="timer_input" placeholder="hr" type="number" min="0" id="breakHours"><span>:</span>
-                    <input class="timer_input" placeholder="min" type="number" min="0" max="59" id="breakMinutes">
+                <div class="timers" id="timers">
+                    <div>
+                        <h1>Work Timer</h1>
+                        <input class="timer_input" placeholder="hr" type="number" min="0" id="workHours"><span>:</span>
+                        <input class="timer_input" placeholder="min" type="number" min="0" max="59" id="workMinutes">
+                    </div>
+                    <div>
+                        <h1>Break Timer</h1>
+                        <input class="timer_input" placeholder="hr" type="number" min="0" id="breakHours"><span>:</span>
+                        <input class="timer_input" placeholder="min" type="number" min="0" max="59" id="breakMinutes">
+                    </div>
                 </div>
                 <div class="repeat" style="grid-column: 1/3;">
                     <p style="font-family: 'DM Serif Display', serif;">Repeat:</p>

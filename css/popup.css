@@ -108,11 +108,18 @@ em{
 .settings{
     padding: 25px 0 20px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     row-gap: 15px;
     box-sizing: border-box;
     justify-items: center;
     width: 100%;
+}
+
+.timers{
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+    flex-direction: row;
 }
 
 .display{

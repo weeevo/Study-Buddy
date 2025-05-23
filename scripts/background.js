@@ -19,7 +19,8 @@ let timerData = {
 let optionsData = {
   automute: true,
   whitelist: false, // by default, block behaviour is not a blacklist!
-  order: true // true means work starts first
+  order: true, // true means work starts first
+  format: false // true represents hr:min format
 }
 
 function startTimer() {
@@ -119,6 +120,16 @@ function updateTheme() {
     });
 }
 
+function updateTimerOrder(){
+  chrome.storage.local.get(["optionsData"], () => {
+      chrome.runtime.sendMessage({
+        action: "updateTimerOrder",
+        order: optionsData.order,
+        format: optionsData.format
+      });
+    });
+}
+
 function saveTimerState() {
   chrome.storage.local.set({ timerData });
   chrome.storage.local.set({ optionsData });
@@ -200,8 +211,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   // whenever we start or unpause the timer
   if (request.action === "startTimer") {
     const { workHours, workMinutes, breakHours, breakMinutes, repeats } = request.data;
-    timerData.workDuration = (workHours * 60 + workMinutes) * 60 * 1000;
-    timerData.breakDuration = (breakHours * 60 + breakMinutes) * 60 * 1000;
+    if(optionsData.format){
+      timerData.workDuration = (workHours * 60 + workMinutes) * 60 * 1000;
+      timerData.breakDuration = (breakHours * 60 + breakMinutes) * 60 * 1000;
+    }
+    else{
+      timerData.workDuration = (workHours * 60 + workMinutes) * 1000;
+      timerData.breakDuration = (breakHours * 60 + breakMinutes) * 1000;
+    }
     timerData.repeats = repeats;
     timerData.isRunning = true;
     // saveTimerState();
@@ -215,6 +232,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   //updates popup ui each time its opened
   else if (request.action == "updatePopup") {
+    updateTimerOrder();
     updateUI();
   }
   // resets the timer when reset button is pressed
@@ -376,6 +394,7 @@ function unmuteTab(tabId) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if(request.action == "updateOptions"){
     optionsData = request.data;
+    updateTimerOrder();
     saveTimerState();
   }
   if(request.action == "getOptions"){

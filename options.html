@@ -19,16 +19,19 @@
         <div class="logo">Studdy Buddy</div>
         <form class="border">
             <fieldset>
-                <legend>Blocking Behavior</legend>
+                <legend>Blocking Settings</legend>
                 <label><input type="checkbox" name="automute" id="automute" checked> Auto mute blocked websites</label>
                 <label><input type="checkbox" name="whitelist" id="whitelist" checked> Block all websites by default</label>
                 <p style="margin-left: 1.8rem;">By unchecking this box, Study Buddy will only block the websites in the site list</p>
             </fieldset>
-            <fieldset style="grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <legend>Timer Order</legend>
-                <label style="gap: .5rem"><input type="radio" name="timer-order" id="work-break" checked> Work,
-                    Break</label>
+            <fieldset style="grid-template-columns: 1fr 1fr;">
+                <legend>Timer Settings</legend>
+                <p style="grid-column: 1/3; text-align: center;">Timer Order</p>
+                <label style="gap: .5rem"><input type="radio" name="timer-order" id="work-break" checked> Work, Break</label>
                 <label style="gap: .5rem"><input type="radio" name="timer-order" id="break-work"> Break, Work</label>
+                <p style="grid-column: 1/3; text-align: center;">Timer Input Format</p>
+                <label style="gap: .5rem"><input type="radio" name="timer-input" id="min-sec" checked> MIN:SEC</label>
+                <label style="gap: .5rem"><input type="radio" name="timer-input" id="hr-min"> HR:MIN</label>
             </fieldset>
             <fieldset>
                 <legend>Button Colors</legend>
