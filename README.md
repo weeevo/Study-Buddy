@@ -1,6 +1,7 @@
 # Study Buddy
 **You better study, buddy!**  
 This chrome extension is your most powerful tool for when you need to focus hard. Set fully customizable work and break timers, and control website blocking during work sessions.  
+visit [https://chromewebstore.google.com/detail/study-buddy/gjbakokpcfkmmjddbkpgjakajolkaoan](url) to add to chrome.  
 
 There is a light and dark mode available, and button colors are fully customizable through the options page!    
 
